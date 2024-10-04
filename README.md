@@ -13,8 +13,6 @@ Special thanks to the developers of the [**mflux**](https://github.com/filipstra
 
 I also want to thank **@CharafChnioune**, the author of [**MFLUX-WEBUI**](https://github.com/CharafChnioune/MFLUX-WEBUI). I have partially referenced his code, and in accordance with the Apache 2.0 license used in his project, I have added license comments in the referenced sections of my code.
 
-MFLUX-WEBUI:https://github.com/CharafChnioune/MFLUX-WEBUI
-
 ## Installation Guide
 1. cd /path/to/your_ComfyUI
 2. Activate your virtual environment
