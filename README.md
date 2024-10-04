@@ -9,11 +9,9 @@ Simple use of Mflux in ComfyUI, suitable for users who are not familiar with ter
 
 ## Acknowledgements
 
-Special thanks to the developers of the mflux project, especially the initiator @filipstrand and active contributor @anthonywu, for making it easier and more efficient for Mac users to generate flux model images. Their contributions are truly delightful; appreciate them!
+Special thanks to the developers of the [**mflux**](https://github.com/filipstrand/mflux) project, especially the initiator **@filipstrand** and active contributor **@anthonywu**, for making it easier and more efficient for Mac users to generate flux model images. Their contributions are truly delightful; appreciate them!
 
-mflux:https://github.com/filipstrand/mflux
-
-I also want to thank @CharafChnioune, the author of MFLUX-WEBUI. I have partially referenced his code, and in accordance with the Apache 2.0 license used in his project, I have added license comments in the referenced sections of my code.
+I also want to thank **@CharafChnioune**, the author of [**MFLUX-WEBUI**](https://github.com/CharafChnioune/MFLUX-WEBUI). I have partially referenced his code, and in accordance with the Apache 2.0 license used in his project, I have added license comments in the referenced sections of my code.
 
 MFLUX-WEBUI:https://github.com/CharafChnioune/MFLUX-WEBUI
 
@@ -21,7 +19,7 @@ MFLUX-WEBUI:https://github.com/CharafChnioune/MFLUX-WEBUI
 1. cd /path/to/your_ComfyUI
 2. Activate your virtual environment
 3. cd custom_nodes
-4. git clone https://github.com/raysers/Mflux-ComfyUI.git
+4. `git clone https://github.com/raysers/Mflux-ComfyUI.git`
 5. pip install mflux==0.3.0
 6. Restart ComfyUI
 

@@ -12,19 +12,15 @@ Mflux在ComfyUI中的简单使用，适合不太懂得使用终端的用户。
 
 ## 特别鸣谢
 
-感谢mflux项目的开发者们，特别是项目发起人 @filipstrand 和活跃贡献者 @anthonywu，是他们让Mac用户实现了更方便高效的flux模型生图，这些贡献着实令人轻松愉悦，谢谢他们！
+感谢[**mflux**](https://github.com/filipstrand/mflux)项目的开发者们，特别是项目发起人 **@filipstrand** 和活跃贡献者 **@anthonywu**，是他们让Mac用户实现了更方便高效的flux模型生图，这些贡献着实令人轻松愉悦，谢谢他们！
 
-mflux:https://github.com/filipstrand/mflux
-
-同时感谢MFLUX-WEBUI的作者 @CharafChnioune，我部分参考了他的代码，基于他的项目所使用的Apache 2.0许可证的要求，我在代码中的引用段落添加了许可证注释。
-
-MFLUX-WEBUI:https://github.com/CharafChnioune/MFLUX-WEBUI
+同时感谢[**MFLUX-WEBUI**](https://github.com/CharafChnioune/MFLUX-WEBUI)的作者 **@CharafChnioune**，我部分参考了他的代码，基于他的项目所使用的Apache 2.0许可证的要求，我在代码中的引用段落添加了许可证注释。
 
 ## 安装指南
 1. cd /path/to/your_ComfyUI
 2. 激活虚拟环境
 3. cd custom_nodes
-4. git clone https://github.com/raysers/Mflux-ComfyUI.git
+4. `git clone https://github.com/raysers/Mflux-ComfyUI.git`
 5. pip install mflux==0.3.0
 6. 重启ComfyUI
 
