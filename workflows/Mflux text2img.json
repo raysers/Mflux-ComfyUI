@@ -1,17 +1,17 @@
 {
-  "last_node_id": 33,
-  "last_link_id": 22,
+  "last_node_id": 2,
+  "last_link_id": 1,
   "nodes": [
     {
-      "id": 32,
+      "id": 1,
       "type": "QuickMfluxNode",
       "pos": {
-        "0": 37,
-        "1": 62
+        "0": 24,
+        "1": 56
       },
       "size": {
         "0": 400,
-        "1": 316
+        "1": 336
       },
       "flags": {},
       "order": 0,
@@ -22,6 +22,12 @@
           "type": "LIST",
           "link": null,
           "label": "lora_files"
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": null,
+          "label": "ControlNet"
         }
       ],
       "outputs": [
@@ -29,7 +35,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            22
+            1
           ],
           "slot_index": 0,
           "shape": 3,
@@ -43,10 +49,10 @@
         "Luxury food photograph",
         "schnell",
         "flux.1-schnell-mflux-4bit",
-        732227569682063,
+        161812310247565,
         "randomize",
-        1024,
-        1024,
+        512,
+        512,
         2,
         3.5,
         "false",
@@ -55,11 +61,11 @@
       ]
     },
     {
-      "id": 33,
+      "id": 2,
       "type": "PreviewImage",
       "pos": {
-        "0": 471,
-        "1": 61
+        "0": 449,
+        "1": 60
       },
       "size": {
         "0": 210,
@@ -72,7 +78,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 22,
+          "link": 1,
           "label": "图像"
         }
       ],
@@ -85,10 +91,10 @@
   ],
   "links": [
     [
-      22,
-      32,
+      1,
+      1,
       0,
-      33,
+      2,
       0,
       "IMAGE"
     ]
@@ -97,10 +103,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1,
+      "scale": 1.2284597357367277,
       "offset": [
-        63,
-        39
+        25.90558087874367,
+        28.985363606324412
       ]
     }
   },
