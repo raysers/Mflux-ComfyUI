@@ -6,6 +6,68 @@ import torch
 
 from mflux.controlnet.controlnet_util import ControlnetUtil
 
+class MfluxLorasPipeline:
+    def __init__(self, lora_paths, lora_scales):
+        self.lora_paths = lora_paths
+        self.lora_scales = lora_scales
+
+    def clear_cache(self):
+        self.lora_paths = []
+        self.lora_scales = []
+
+class MfluxLorasLoader:
+    @classmethod
+    def INPUT_TYPES(cls):
+        lora_base_path = folder_paths.models_dir
+        loras_relative = ["None"] + folder_paths.get_filename_list("loras")
+
+        inputs = {
+            "required": {
+                "Lora1": (loras_relative,),
+                "scale1": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "Lora2": (loras_relative,),
+                "scale2": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+                "Lora3": (loras_relative,),
+                "scale3": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+            },
+            "optional": {
+                "Loras": ("MfluxLorasPipeline",)
+            }
+        }
+
+        return inputs
+
+    RETURN_TYPES = ("MfluxLorasPipeline",)
+    RETURN_NAMES = ("Loras",)
+    FUNCTION = "lora_stacker"
+    CATEGORY = "Mflux/Pro"
+
+    def lora_stacker(self, Loras=None, **kwargs):
+        lora_base_path = folder_paths.models_dir
+        lora_models = [
+            (os.path.join(lora_base_path, "loras", kwargs.get(f"Lora{i}")), kwargs.get(f"scale{i}"))
+            for i in range(1, 4) if kwargs.get(f"Lora{i}") != "None"
+        ]
+        
+        if Loras is not None and isinstance(Loras, MfluxLorasPipeline):
+            lora_paths = Loras.lora_paths
+            lora_scales = Loras.lora_scales
+
+            if lora_paths and lora_scales:
+                lora_models.extend(zip(lora_paths, lora_scales))
+
+        if lora_models:
+            lora_paths, lora_scales = zip(*lora_models)
+        else:
+            lora_paths, lora_scales = [], []
+
+        return (MfluxLorasPipeline(list(lora_paths), list(lora_scales)),)
+
+class MfluxLorasPipeline:
+    def __init__(self, lora_paths, lora_scales):
+        self.lora_paths = lora_paths
+        self.lora_scales = lora_scales
+
 class MfluxControlNetPipeline:
     def __init__(self, image_path, model_selection, strength, save_canny=False):
         self.image_path = image_path
@@ -46,20 +108,15 @@ class MfluxControlNetLoader:
     def load_and_select(self, image, model_selection, strength, save_canny):
         save_canny_bool = save_canny == "true"
         image_path = folder_paths.get_annotated_filepath(image)
-        print(f"Loading image from path: {image_path}")
 
         with Image.open(image_path) as img:
             width, height = img.size
             canny_image = ControlnetUtil.preprocess_canny(img)
             canny_image_np = np.array(canny_image).astype(np.float32) / 255.0
             canny_tensor = torch.from_numpy(canny_image_np)
-
+            
             if canny_tensor.dim() == 3:
                 canny_tensor = canny_tensor.unsqueeze(0)
-
-        print(f"Model selection: {model_selection}")
-        print(f"Strength: {strength}")
-        print(f"Save Canny: {save_canny_bool}")
 
         return MfluxControlNetPipeline(image_path, model_selection, strength, save_canny_bool), width, height, canny_tensor
 

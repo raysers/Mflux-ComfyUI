@@ -1,0 +1,174 @@
+{
+  "last_node_id": 33,
+  "last_link_id": 13,
+  "nodes": [
+    {
+      "id": 32,
+      "type": "MfluxLorasLoader",
+      "pos": {
+        "0": 33,
+        "1": 59
+      },
+      "size": {
+        "0": 315,
+        "1": 178
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null,
+          "shape": 7,
+          "label": "Loras"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "links": [
+            12
+          ],
+          "label": "Loras"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxLorasLoader"
+      },
+      "widgets_values": [
+        "Mflux/aidmaImageUpgrader-FLUX-V0.2.safetensors",
+        0.8,
+        "Mflux/Flux_1_Dev_LoRA_Paper-Cutout-Style.safetensors",
+        1,
+        "None",
+        1
+      ]
+    },
+    {
+      "id": 25,
+      "type": "QuickMfluxNode",
+      "pos": {
+        "0": 378,
+        "1": 60
+      },
+      "size": {
+        "0": 400,
+        "1": 356
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Local_models",
+          "type": "PATH",
+          "link": null,
+          "shape": 7,
+          "label": "Local_models"
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": 12,
+          "shape": 7,
+          "label": "Loras"
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": null,
+          "shape": 7,
+          "label": "ControlNet"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ],
+          "slot_index": 0,
+          "label": "IMAGE"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QuickMfluxNode"
+      },
+      "widgets_values": [
+        "There, at the very end of the earth In an unprecedented blue distance Hearing the sounds of unprecedented words Sweetly and sweetly the blood stops There the winds fly touching the stars Where trees are not afraid of thunderstorms There ships are roaming the ocean There, at the very end of the earth, glitter, hyper detailed, ornate, professional photo, photorealism, vivid color, chiaroscuro",
+        "schnell",
+        "4",
+        1115004813920489,
+        "randomize",
+        1216,
+        832,
+        4,
+        3.5,
+        "true",
+        ""
+      ]
+    },
+    {
+      "id": 23,
+      "type": "PreviewImage",
+      "pos": {
+        "0": 819,
+        "1": 63
+      },
+      "size": {
+        "0": 210,
+        "1": 246
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6,
+          "label": "图像"
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      6,
+      25,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      32,
+      0,
+      25,
+      1,
+      "MfluxLorasPipeline"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.116781577942483,
+      "offset": [
+        48.91843793267095,
+        51.73609488467785
+      ]
+    }
+  },
+  "version": 0.4
+}

@@ -1,7 +1,7 @@
 [project]
 name = "mflux-comfyui"
-description = "Simple use of [a/Mflux](https://github.com/filipstrand/mflux) in ComfyUI, suitable for users who are not familiar with terminal usage.\nNOTE: A MLX port of FLUX based on the Huggingface Diffusers implementation."
-version = "1.0.1"
+description = "Mflux stands for Mac Flux, and its main purpose is to **Run the powerful FLUX models from Black Forest Labs locally on your Mac!** This plugin provides a simple way to use Mflux within ComfyUI, suitable for users who are not familiar with terminal usage."
+version = "1.1.0"
 license = {file = "LICENSE"}
 dependencies = ["mflux==0.3.0"]
 

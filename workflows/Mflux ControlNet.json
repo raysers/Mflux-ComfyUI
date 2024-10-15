@@ -1,75 +1,7 @@
 {
-  "last_node_id": 12,
-  "last_link_id": 15,
+  "last_node_id": 15,
+  "last_link_id": 21,
   "nodes": [
-    {
-      "id": 9,
-      "type": "MfluxControlNetLoader",
-      "pos": {
-        "0": 26,
-        "1": 52
-      },
-      "size": {
-        "0": 315,
-        "1": 426
-      },
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "ControlNet",
-          "type": "MfluxControlNetPipeline",
-          "links": [
-            11
-          ],
-          "slot_index": 0,
-          "shape": 3,
-          "label": "ControlNet"
-        },
-        {
-          "name": "width",
-          "type": "INT",
-          "links": [
-            12
-          ],
-          "slot_index": 1,
-          "shape": 3,
-          "label": "width"
-        },
-        {
-          "name": "height",
-          "type": "INT",
-          "links": [
-            13
-          ],
-          "slot_index": 2,
-          "shape": 3,
-          "label": "height"
-        },
-        {
-          "name": "canny_image",
-          "type": "IMAGE",
-          "links": [
-            14
-          ],
-          "slot_index": 3,
-          "shape": 3,
-          "label": "canny_image"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MfluxControlNetLoader"
-      },
-      "widgets_values": [
-        "图像.jpeg",
-        "InstantX/FLUX.1-dev-Controlnet-Canny",
-        0.4,
-        "false",
-        "image"
-      ]
-    },
     {
       "id": 11,
       "type": "PreviewImage",
@@ -99,36 +31,113 @@
       "widgets_values": []
     },
     {
-      "id": 10,
-      "type": "QuickMfluxNode",
+      "id": 9,
+      "type": "MfluxControlNetLoader",
       "pos": {
-        "0": 370,
-        "1": 56
+        "0": 26,
+        "1": 52
       },
       "size": {
-        "0": 400,
-        "1": 337
+        "0": 315,
+        "1": 426
       },
       "flags": {},
-      "order": 1,
+      "order": 0,
       "mode": 0,
-      "inputs": [
-        {
-          "name": "lora_files",
-          "type": "LIST",
-          "link": null,
-          "label": "lora_files"
-        },
+      "inputs": [],
+      "outputs": [
         {
           "name": "ControlNet",
           "type": "MfluxControlNetPipeline",
-          "link": 11,
+          "links": [
+            18
+          ],
+          "slot_index": 0,
+          "shape": 3,
           "label": "ControlNet"
         },
         {
           "name": "width",
           "type": "INT",
-          "link": 12,
+          "links": [
+            16
+          ],
+          "slot_index": 1,
+          "shape": 3,
+          "label": "width"
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            17
+          ],
+          "slot_index": 2,
+          "shape": 3,
+          "label": "height"
+        },
+        {
+          "name": "canny_image",
+          "type": "IMAGE",
+          "links": [
+            14
+          ],
+          "slot_index": 3,
+          "shape": 3,
+          "label": "canny_image"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxControlNetLoader"
+      },
+      "widgets_values": [
+        "图像.jpeg",
+        "InstantX/FLUX.1-dev-Controlnet-Canny",
+        0.4,
+        "false",
+        "image"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "QuickMfluxNode",
+      "pos": {
+        "0": 379,
+        "1": 54
+      },
+      "size": {
+        "0": 400,
+        "1": 333
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Local_models",
+          "type": "PATH",
+          "link": 21,
+          "shape": 7,
+          "label": "Local_models"
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null,
+          "shape": 7,
+          "label": "Loras"
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": 18,
+          "shape": 7,
+          "label": "ControlNet"
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 16,
           "widget": {
             "name": "width"
           },
@@ -137,7 +146,7 @@
         {
           "name": "height",
           "type": "INT",
-          "link": 13,
+          "link": 17,
           "widget": {
             "name": "height"
           },
@@ -149,10 +158,9 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            15
+            19
           ],
           "slot_index": 0,
-          "shape": 3,
           "label": "IMAGE"
         }
       ],
@@ -162,37 +170,68 @@
       "widgets_values": [
         "1girl, ",
         "dev",
-        "flux.1-dev-mflux-4bit",
-        1031674300637981,
+        "4",
+        319186117333639,
         "randomize",
         512,
         512,
         20,
         3.5,
         "false",
-        "",
         true
+      ]
+    },
+    {
+      "id": 15,
+      "type": "MfluxModelsLoader",
+      "pos": {
+        "0": 382,
+        "1": 448
+      },
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "Local_models",
+          "type": "PATH",
+          "links": [
+            21
+          ],
+          "label": "Local_models"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxModelsLoader"
+      },
+      "widgets_values": [
+        "flux.1-dev-mflux-4bit"
       ]
     },
     {
       "id": 12,
       "type": "PreviewImage",
       "pos": {
-        "0": 803,
-        "1": 56
+        "0": 821,
+        "1": 59
       },
       "size": {
         "0": 210,
         "1": 246
       },
       "flags": {},
-      "order": 3,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 15,
+          "link": 19,
           "label": "图像"
         }
       ],
@@ -205,30 +244,6 @@
   ],
   "links": [
     [
-      11,
-      9,
-      0,
-      10,
-      1,
-      "MfluxControlNetPipeline"
-    ],
-    [
-      12,
-      9,
-      1,
-      10,
-      2,
-      "INT"
-    ],
-    [
-      13,
-      9,
-      2,
-      10,
-      3,
-      "INT"
-    ],
-    [
       14,
       9,
       3,
@@ -237,22 +252,54 @@
       "IMAGE"
     ],
     [
-      15,
-      10,
+      16,
+      9,
+      1,
+      13,
+      3,
+      "INT"
+    ],
+    [
+      17,
+      9,
+      2,
+      13,
+      4,
+      "INT"
+    ],
+    [
+      18,
+      9,
+      0,
+      13,
+      2,
+      "MfluxControlNetPipeline"
+    ],
+    [
+      19,
+      13,
       0,
       12,
       0,
       "IMAGE"
+    ],
+    [
+      21,
+      15,
+      0,
+      13,
+      0,
+      "PATH"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.9229599817706443,
+      "scale": 1.228459735736728,
       "offset": [
-        47.86433519924988,
-        59.566368698020256
+        50.15841132309907,
+        51.40301135242093
       ]
     }
   },
