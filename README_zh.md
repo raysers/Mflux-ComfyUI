@@ -31,33 +31,22 @@ https://github.com/filipstrand/mflux
 
 ## 更新声明
 
-本次更新为了支持Lora，重新设计了模型加载和量化机制，保持与Mflux官方一致，使用完整模型+量化参数，可能导致之前版本机制中下载的4BIT模型变得多余，然而：
+本次更新为了支持Lora，重新设计了模型加载和量化机制，保持与Mflux官方一致，使用完整模型+量化参数，这导致运行时需要从Huggingface下载几十G的黑森林FLUX原生模型，也许会给部分用户带来负担。
 
-**我建议保留。**
+这是目前为了实现Lora功能的无奈之举，因为Lora只对完整版的权重起作用，使用量化模型则会报错，无法绕开。
 
-因为我个人的机器是老态龙钟的M1 pro 16GB，使用完整版模型的时候虽然选择了量化参数为4，但这机子有时也难免后继乏力。
+为了避免重复下载带来的资源浪费，如果之前ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux**”目录下并且使用**Mflux Models Loader**节点加载，可以直接使用跳过下载流程。
 
-在这次模型机制的变更中需要顾及到以下问题：
+当然，如果对Lora的需求不大，仍然推荐继续使用之前的4BIT量化模型，只要它还在以前版本的预设路径“**models/Mflux**”目录下，那么就可以在**Mflux Models Loader**节点列表中自由选择。
 
-1、mflux老用户们终端运行mflux生图的时候，大部分人已经从Huggingface下载过完整版的黑森林团队原生dev和schnell模型，一般存储在用户目录.cache中，如果他们只是想来ComfyUI体验一把，此时重新下载就显得多余；
+这里也给出4BIT版本的手动下载地址：
 
-2.有些ComfyUI用户之前可能也下载过完整版的原生模型，也许在ComfyUI的models/checkpoint中，此时重新下载同样显得多余。
-
-为了解决这些资源浪费的问题，我只能想出新造节点的法子，这个版本中添加了一个加载本地模型的节点**Mflux Models Loader**，既然插件过往版本的4BIT量化模型被默认机制存储到了models/mflux中，那么这个节点的主要功能就是检索models/Mflux下的模型，如果用户ComfyUI中已经有过完整版的原生dev和schnell模型，不妨可以将其移动至models/Mflux中，它们将被自动检索，避免从Huggingface再次下载。
-
-那么为何我们需要完整版的dev和schnell？量化不行吗？
-
-是的，在当前的实现中，只有完整版的模型能够实现利用LORA调整权重，能做的补救方法就是利用mflux的量化参数，我们可以设置成4或者8.
-
-至于以前下载的4BIT版本该不该保留，我个人是选择了保留，因为比起完整模型加量化参数方式，直接加载4BIT的显存消耗似乎更少，不知是否心理作用。
-
-当然配置高的用户可以忽视这些，用户们可以自行选择是否删除多余模型以节省硬盘空间。
-
-————以上是本次更新可能带来的混乱，在这里致个歉。
+[madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
+[madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
 
 ## 使用说明
 
-节点列表：
+右键新建节点：
 
 **Mflux/Air**下：
 
@@ -81,7 +70,7 @@ https://github.com/filipstrand/mflux
 
 这个流程将会从Huggingface下载完整版的dev或schnell到.cache里。
 
-如果你的完整版dev或schnell已经移动到models/Mflux，此时外接一个**Mflux Loras Loader**选择你的完整版dev或schnell，那么不会触发下载，会直接使用你本地的完整版模型。
+如果你的完整版dev或schnell已经移动到models/Mflux，此时外接一个**Mflux Models Loader**选择你的完整版dev或schnell，那么不会触发下载，会直接使用你本地的完整版模型。
 
 或者外接的节点可以用来继续加载4BIT量化模型，比如：
 
@@ -92,9 +81,9 @@ https://github.com/filipstrand/mflux
 
 ![Loras](examples/Pro_Loras.png)
 
-图中使用了两个**Mflux Loras Loader**节点，只是为了说明它们是客户串接的，也就是说，理论上可以加载无数Lora...
+图中使用了两个**Mflux Loras Loader**节点，只是为了说明它们是可以串接的，也就是说，理论上可以加载无数Lora...
 
-注意使用Lora的时候不能串接本地模型，那样将会报错。
+注意使用Lora的时候同样可以用**Mflux Models Loader**节点加载本地模型，但仅限完整版模型，如果模型列表中选择了量化模型，那样将会报错。
 
 
 
@@ -124,6 +113,7 @@ Mflux的ControlNet，目前仅支持Canny
 ！！！请注意流程末端全部使用的是预览节点，不会自动保存，需要自己挑选满意的生成图片手动保存，或者干脆把预览节点换成保存节点。
 
  **Quick MFlux Generation** 节点中的metadata选项，如果它是true值（默认false），那么生成的图像将被保存到 **ComfyUI/output/Mflux** 中，同时带有图像同名的json文件，里面包含了该图像的几乎一切生成参数。
+ 我个人比较喜欢打开metadata为true，同时连接预览节点而不是保存节点，这样的好处是不会重复保存，而且如果日后要检索某图片的信息，可以直接json文件中查阅，方便复刻图像。
 
 ### 可能的探索
 
