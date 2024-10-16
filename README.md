@@ -30,6 +30,12 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ## Update Statement
 
+The storage path for ComfyUI's Loras is models/loras, and you need to manually place the LORA files into this directory. The Mflux Loras Loader node will automatically retrieve them.
+
+My habit is to create a folder named Mflux under models/loras to store the LORAs compatible with Mflux, so that they are uniformly stored there. Therefore, in my nodes, the retrieved files should be Mflux/*******.safetensors.
+
+**Please note:**
+
 This update redesigns the model loading and quantization mechanism to support Lora, keeping it consistent with the official Mflux, using the full model + quantization parameters. This may require downloading dozens of gigabytes of the native Black Forest FLUX model from Huggingface, which might burden some users.
 
 This is currently a necessary measure to implement the Lora functionality, as Lora only works with the full version of the weights. Using a quantized model will cause errors, and there’s no way around it.

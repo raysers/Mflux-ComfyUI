@@ -31,6 +31,12 @@ https://github.com/filipstrand/mflux
 
 ## 更新声明
 
+ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进目录里，**Mflux Loras Loader**节点将自动检索。
+
+我的习惯是在**models/loras**下新建Mflux文件夹，用来检测Mflux所能适配的LORA，统一存放其中，因此在我的节点中，检索出来的应该是Mflux/*******.safetensors
+
+**需要注意：**
+
 本次更新为了支持Lora，重新设计了模型加载和量化机制，保持与Mflux官方一致，使用完整模型+量化参数，这导致运行时需要从Huggingface下载几十G的黑森林FLUX原生模型，也许会给部分用户带来负担。
 
 这是目前为了实现Lora功能的无奈之举，因为Lora只对完整版的权重起作用，使用量化模型则会报错，无法绕开。
