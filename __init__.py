@@ -13,4 +13,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MfluxModelsLoader": "Mflux Models Loader",
     "MfluxLorasLoader": "Mflux Loras Loader",
     "MfluxControlNetLoader": "Mflux ControlNet Loader",
-}
