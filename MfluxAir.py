@@ -47,6 +47,7 @@ class MfluxModelsLoader:
     @classmethod
     def get_model_paths(cls):
         mflux_dir = os.path.join(models_dir, "Mflux")
+        Path(mflux_dir).mkdir(parents=True, exist_ok=True)
         return [p.name for p in Path(mflux_dir).iterdir() if p.is_dir()]
 
     def load(self, model_name):
