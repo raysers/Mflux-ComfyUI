@@ -110,6 +110,8 @@ ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux*
 
 **注意**
 
+无论是下载Huggingface的模型还是自定义专属模型，它们都仅需要运行一次，只要你保存了模型，就可以使用**Mflux Models Loader**节点来检索它们。
+
 **Mflux Custom Models**节点中的custom_identifier不是必填项，如果不需要特定表示作区分，完全可以选择留空。
 
 
