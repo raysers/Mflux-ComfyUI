@@ -43,7 +43,7 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 2. I have attempted to complete the final piece of the puzzle for Mflux 0.3.0, which allows users to save their exclusive models. With this feature, as long as you have the complete native Black Forest model saved in your `.cache`, you can customize your own exclusive model by setting parameters. This makes downloading less necessary, as you can create it yourself.
 
-**Previous Update Highlights:**
+**Previous Update:**
 
 The LORA storage path in ComfyUI is **models/loras**, and LORA files need to be manually placed in this directory. The **Mflux Loras Loader** node will automatically search for them.
 
@@ -51,9 +51,9 @@ I typically create a folder named Mflux under **models/loras** to keep track of 
 
 **Important Note:**
 
-ComfyUI already has complete FLUX models. You can move the models to the **models/Mflux** directory and use the **Mflux Models Loader** node to load them, allowing you to skip the download process.
+To avoid wasting resources by downloading repeatedly, if you already have the full FLUX model in ComfyUI, you can move the model to the "**models/Mflux**" directory and use the **Mflux Models Loader** node to load it, allowing you to bypass the download process.
 
-Of course, if your need for LORA is minimal, I still recommend continuing to use the previous 4-bit quantized model. As long as it remains in the old preset path of **models/Mflux**, you can freely select it from the **Mflux Models Loader** node list.
+Of course, if you don't have a strong need for Lora, it is still recommended to continue using the previous 4BIT quantized model. As long as it remains in the old version's preset path in the "**models/Mflux**" directory, you can freely choose it from the **Mflux Models Loader** node list.
 
 Additionally, this update covers nearly all loading methods for models, allowing users with various needs to use models freely. I personally recommend the 4-bit Schnell 2-step, which achieved over 20+ seconds of raw image generation on my M1 Pro 16GB.
 
