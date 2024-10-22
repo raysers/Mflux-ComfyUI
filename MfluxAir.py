@@ -66,7 +66,7 @@ class MfluxModelsDownloader:
         }
 
     RETURN_TYPES = ("PATH",)
-    RETURN_NAMES = ("Downloaded_Models",)
+    RETURN_NAMES = ("Downloaded_models",)
     CATEGORY = "Mflux/Air"
     FUNCTION = "download_model"
 
