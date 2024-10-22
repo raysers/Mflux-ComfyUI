@@ -63,11 +63,6 @@ class MfluxLorasLoader:
 
         return (MfluxLorasPipeline(list(lora_paths), list(lora_scales)),)
 
-class MfluxLorasPipeline:
-    def __init__(self, lora_paths, lora_scales):
-        self.lora_paths = lora_paths
-        self.lora_scales = lora_scales
-
 class MfluxControlNetPipeline:
     def __init__(self, image_path, model_selection, strength, save_canny=False):
         self.image_path = image_path

@@ -6,18 +6,20 @@ from pathlib import Path
 import numpy as np
 import torch
 from huggingface_hub import snapshot_download
-from folder_paths import get_filename_list, get_output_directory, models_dir
+from folder_paths import get_filename_list, get_output_directory, models_dir  
+
 from mflux.config.model_config import ModelConfig
 from mflux.config.config import Config, ConfigControlnet
 from mflux.flux.flux import Flux1
 from mflux.controlnet.flux_controlnet import Flux1Controlnet
-from .MfluxPro import MfluxControlNetPipeline
+from .MfluxPro import MfluxControlNetPipeline  
 
 flux_cache = {}
 
 def load_or_create_flux(model, quantize, path, lora_paths, lora_scales, is_controlnet=False):
     key = (model, quantize, path, tuple(lora_paths), tuple(lora_scales), is_controlnet)
     if key not in flux_cache:
+        flux_cache.clear()  
         FluxClass = Flux1Controlnet if is_controlnet else Flux1
         flux_cache[key] = FluxClass(
             model_config=ModelConfig.from_alias(model),
@@ -30,12 +32,57 @@ def load_or_create_flux(model, quantize, path, lora_paths, lora_scales, is_contr
     # Portions of this code are derived from the work of CharafChnioune at https://github.com/CharafChnioune/MFLUX-WEBUI
     return flux_cache[key]
 
+def create_directory(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    return directory
+
+mflux_dir = os.path.join(models_dir, "Mflux")
+create_directory(mflux_dir)
+
+def get_full_model_path(model_dir, model_name):
+    return os.path.join(model_dir, model_name)
+
+def download_hg_model(model_version):
+    model_checkpoint = get_full_model_path(mflux_dir, model_version)  
+    if not os.path.exists(model_checkpoint):
+        print(f"Downloading model {model_version} to {model_checkpoint}...")
+        try:
+            snapshot_download(repo_id=f"madroid/{model_version}", local_dir=model_checkpoint, local_dir_use_symlinks=False)
+        except Exception as e:
+            print(f"Error downloading model {model_version}: {e}")
+            return None
+    else:
+        print(f"Model {model_version} already exists at {model_checkpoint}. Skipping download.")
+    return model_checkpoint
+
+class MfluxModelsDownloader:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model_version": (["flux.1-schnell-mflux-4bit", "flux.1-dev-mflux-4bit"], {"default": "flux.1-schnell-mflux-4bit"}),
+            }
+        }
+
+    RETURN_TYPES = ("PATH",)
+    RETURN_NAMES = ("Downloaded_Models",)
+    CATEGORY = "Mflux/Air"
+    FUNCTION = "download_model"
+
+    def download_model(self, model_version):
+        full_model_id = f"madroid/{model_version}"
+        model_path = download_hg_model(model_version)
+        if model_path:
+            return (model_path,)  
+        return (None,)
+
 class MfluxModelsLoader:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model_name": (cls.get_model_paths(),)
+                "model_name": (cls.get_sorted_model_paths(),)
             }
         }
 
@@ -45,15 +92,13 @@ class MfluxModelsLoader:
     FUNCTION = "load"
 
     @classmethod
-    def get_model_paths(cls):
-        mflux_dir = os.path.join(models_dir, "Mflux")
-        Path(mflux_dir).mkdir(parents=True, exist_ok=True)
-        return [p.name for p in Path(mflux_dir).iterdir() if p.is_dir()]
+    def get_sorted_model_paths(cls):
+        model_paths = [p.name for p in Path(mflux_dir).iterdir() if p.is_dir()]
+        return sorted(model_paths, key=lambda x: x.lower())
 
     def load(self, model_name):
-        model_paths = self.get_model_paths()
-        full_model_path = os.path.join(models_dir, "Mflux", model_name)
-        return (full_model_path,) if model_name in model_paths else ("",)
+        full_model_path = get_full_model_path(mflux_dir, model_name)
+        return (full_model_path,)
 
 class QuickMfluxNode:
     @classmethod
@@ -62,13 +107,13 @@ class QuickMfluxNode:
             "required": {
                 "prompt": ("STRING", {"multiline": True, "dynamicPrompts": True, "tooltip": "The text to be encoded.", "default": "Luxury food photograph"}),
                 "model": (["dev", "schnell"], {"default": "schnell"}),
-                "quantize": (["None", "4", "8"], {"default": "None"}),
+                "quantize": (["None", "4", "8"], {"default": "4"}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
                 "width": ("INT", {"default": 512}),
                 "height": ("INT", {"default": 512}),
                 "steps": ("INT", {"default": 2, "min": 1}),
-                "cfg": ("FLOAT", {"default": 3.5, "min": 0.0}),
-                "metadata": (["true", "false"], {"default": "false"}),
+                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0}),
+                "metadata": ("BOOLEAN", {"default": True, "label_on": "True", "label_off": "False"}),
             },
             "optional": {
                 "Local_models": ("PATH",),
@@ -81,83 +126,164 @@ class QuickMfluxNode:
     CATEGORY = "Mflux/Air"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, cfg, quantize="None", metadata="false", Local_models="", Loras=None, ControlNet=None):
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_models="", Loras=None, ControlNet=None):
         model = "dev" if "dev" in Local_models.lower() else "schnell" if "schnell" in Local_models.lower() else model
+
         print(f"Using model: {model}")
+        print(f"Local model path: {Local_models}")
+
+        if Loras:
+            print(f"LORA paths: {Loras.lora_paths}")
+            print(f"LORA scales: {Loras.lora_scales}")
+
         image_path, save_canny, strength = None, None, None
+        
         if ControlNet:
             if isinstance(ControlNet, MfluxControlNetPipeline):
                 image_path = ControlNet.image_path
                 save_canny = ControlNet.save_canny
                 strength = ControlNet.strength
+
         is_controlnet = ControlNet is not None
+
         quantize = None if quantize == "None" else int(quantize)
+
         seed = random.randint(0, 0xffffffffffffffff) if seed == -1 else int(seed)
         print(f"Using seed: {seed}")
+
         steps = min(max(steps, 2), 4) if model == "schnell" else steps
+
         lora_paths = Loras.lora_paths if Loras else []
         lora_scales = Loras.lora_scales if Loras else []
+        
         flux = load_or_create_flux(model, quantize, Local_models if Local_models else None, lora_paths, lora_scales, is_controlnet)
+
         output_image_path = (
             f"{get_output_directory()}/generated_image.png"
             if is_controlnet and save_canny == "true"
             else None
         )
+
         config_class = ConfigControlnet if is_controlnet else Config
         config = config_class(
             num_inference_steps=steps,
             height=height,
             width=width,
-            guidance=cfg,
+            guidance=guidance,
             **({"controlnet_strength": strength} if is_controlnet else {})
         )
+
         generate_args = {
             "seed": seed,
             "prompt": prompt,
             "config": config
         }
+
         if is_controlnet:
             generate_args["controlnet_image_path"] = image_path
             generate_args["controlnet_save_canny"] = save_canny
+
             if save_canny == "true":
                 generate_args["output"] = output_image_path
             else:
                 generate_args["output"] = ""
+
         image = flux.generate_image(**generate_args)
+
         inner_image = image.image
         tensor_image = torch.from_numpy(np.array(inner_image).astype(np.float32) / 255.0)
+
         if tensor_image.dim() == 3:
             tensor_image = tensor_image.unsqueeze(0)
-        if metadata == "true":
-            self.save_images([inner_image], prompt, model, Local_models, seed, height, width, steps, cfg)
+
+        if metadata:
+            self.save_images([inner_image], prompt, model, Local_models, seed, height, width, steps, guidance, lora_paths=lora_paths, lora_scales=lora_scales)
+
+        print(f"Generated tensor image with shape: {tensor_image.shape}, dtype: {tensor_image.dtype}")
         return (tensor_image,)
     
-    def save_images(self, images, prompt, model, Local_models, seed, height, width, steps, cfg, filename_prefix="Mflux"):
+    def save_images(self, images, prompt, model, Local_models, seed, height, width, steps, guidance, lora_paths=None, lora_scales=None, filename_prefix="Mflux"):
         output_dir = get_output_directory()
-        mflux_dir = os.path.join(output_dir, "Mflux")
-        os.makedirs(mflux_dir, exist_ok=True)
+        mflux_output_dir = os.path.join(output_dir, "Mflux")
+        create_directory(mflux_output_dir)
+
         results = []
-        existing_files = os.listdir(mflux_dir)
-        existing_count = len([f for f in existing_files if f.startswith(filename_prefix)])
-        for (batch_number, img) in enumerate(images):
-            filename = f"{filename_prefix}_{existing_count + batch_number:05}.png"
-            file_path = os.path.join(mflux_dir, filename)
+        existing_files = os.listdir(mflux_output_dir)
+        
+        existing_indices = [
+            int(f.split('_')[-1].split('.')[0]) 
+            for f in existing_files 
+            if f.startswith(filename_prefix) and f.endswith(('.png', '.json'))
+        ]
+
+        next_index = max(existing_indices, default=0) + 1
+
+        for batch_number, img in enumerate(images):
+            filename = f"{filename_prefix}_{next_index:05}.png"
+            file_path = os.path.join(mflux_output_dir, filename)
             img.save(file_path)
+
             metadata = {
                 "prompt": prompt,
                 "model": model,
-                "path": Local_models,
+                "Local_models": os.path.basename(Local_models),
                 "seed": seed,
                 "height": height,
                 "width": width,
                 "steps": steps,
-                "guidance": cfg,
+                "guidance": guidance,
+                "lora_paths": [os.path.basename(path) for path in lora_paths],
+                "lora_scales": lora_scales,
             }
-            metadata_filename = os.path.join(mflux_dir, f"{filename_prefix}_{existing_count + batch_number:05}.json")
+
+            metadata_filename = get_full_model_path(mflux_output_dir, f"{filename_prefix}_{next_index:05}.json")
             with open(metadata_filename, 'w') as metadata_file:
-                json.dump(metadata, metadata_file)
+                json.dump(metadata, metadata_file, indent=4)
+
             results.append({
                 "filename": filename,
                 "path": file_path,
             })
+
+            next_index += 1
+
         return results
+
+class MfluxCustomModels:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (["dev", "schnell"], {"default": "schnell"}),
+                "quantize": (["4", "8"], {"default": "4"}),
+            },
+            "optional": {
+                "Loras": ("MfluxLorasPipeline",),
+                "custom_identifier": ("STRING", {"default": "", "tooltip": "Custom identifier for the model."}),
+            }
+        }
+
+    RETURN_TYPES = ("PATH",)
+    RETURN_NAMES = ("Custom_models",)
+    CATEGORY = "Mflux/Air"
+    FUNCTION = "save_model"
+
+    def save_model(self, model, quantize, Loras=None, custom_identifier=""):
+        identifier = custom_identifier if custom_identifier else "default"
+        save_dir = get_full_model_path(mflux_dir, f"Mflux-{model}-{quantize}bit-{identifier}")
+        create_directory(save_dir)
+
+        print(f"Saving model: {model}, quantize: {quantize}, save_dir: {save_dir}")
+
+        lora_paths = Loras.lora_paths if Loras else []
+        lora_scales = Loras.lora_scales if Loras else []
+        print(f"LORA paths: {lora_paths}")
+        print(f"LORA scales: {lora_scales}")
+
+        model_config = ModelConfig.from_alias(model)
+        flux = Flux1(model_config=model_config, quantize=int(quantize), lora_paths=lora_paths, lora_scales=lora_scales)
+        flux.save_model(save_dir)
+
+        print(f"Model saved to {save_dir}")
+
+        return (save_dir,)

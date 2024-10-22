@@ -31,24 +31,32 @@ https://github.com/filipstrand/mflux
 
 ## 更新声明
 
+**关于本次更新：**
+
+1.找回了上次更新所放弃的Huggingface自动下载功能，方便用户直接下载既有的Mflux 4bit模型。同时如果有用户能够提供8bit的版本，下一步也将添加进列表中。
+
+ps.我曾试过上传8bit版，但几十KB的上传速度让我最终放弃了，抱歉诸位。
+
+这里也给出4BIT版本的手动下载地址：
+
+- [madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
+- [madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
+
+2.尝试补全了Mflux0.3.0的最后一块拼图，即保存用户专属模型。拥有了这个功能，只要您的.cache中保存有完整的黑森林原生模型，您就可以设置参数来自由定制属于您自己的专属模型。下载也就变得鸡肋了，因为自己动手丰衣足食。
+
+**往期更新回顾：**
+
 ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进目录里，**Mflux Loras Loader**节点将自动检索。
 
 我的习惯是在**models/loras**下新建Mflux文件夹，用来检测Mflux所能适配的LORA，统一存放其中，因此在我的节点中，检索出来的应该是Mflux/*******.safetensors
 
 **需要注意：**
 
-本次更新为了支持Lora，重新设计了模型加载和量化机制，保持与Mflux官方一致，使用完整模型+量化参数，这导致运行时需要从Huggingface下载几十G的黑森林FLUX原生模型，也许会给部分用户带来负担。
-
-这是目前为了实现Lora功能的无奈之举，因为Lora只对完整版的权重起作用，使用量化模型则会报错，无法绕开。
-
-为了避免重复下载带来的资源浪费，如果之前ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux**”目录下并且使用**Mflux Models Loader**节点加载，可以直接使用跳过下载流程。
+ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux**”目录下并且使用**Mflux Models Loader**节点加载，可以直接使用跳过下载流程。
 
 当然，如果对Lora的需求不大，仍然推荐继续使用之前的4BIT量化模型，只要它还在以前版本的预设路径“**models/Mflux**”目录下，那么就可以在**Mflux Models Loader**节点列表中自由选择。
 
-这里也给出4BIT版本的手动下载地址：
-
-[madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
-[madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
+同时此次更新几乎涵盖了模型的全部加载方式，让各种需求的用户都能实现模型自由。我本人推荐的仍然是4bit Schnell 2step,在我的M1 Pro 16GB上实现了20+秒生图。
 
 ## 使用说明
 
@@ -56,13 +64,15 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 **Mflux/Air**下：
 
-**Quick MFlux Generation**
-**Mflux Models Loader**
+- **Quick MFlux Generation**
+- **Mflux Models Loader**
+- **Mflux Models Downloader**
+- **Mflux Custom Models**
 
 **Mflux/Pro**下：
 
-**Mflux Loras Loader**
-**Mflux ControlNet Loader**
+- **Mflux Loras Loader**
+- **Mflux ControlNet Loader**
 
 或者双击画板空白处调出节点搜索框，直接搜索节点名称，搜索关键字“Mflux”
 
@@ -72,8 +82,6 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 ![text2img](examples/Air.png)
 
-
-
 这个流程将会从Huggingface下载完整版的dev或schnell到.cache里。
 
 如果你的完整版dev或schnell已经移动到models/Mflux，此时外接一个**Mflux Models Loader**选择你的完整版dev或schnell，那么不会触发下载，会直接使用你本地的完整版模型。
@@ -82,8 +90,33 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 ![text2img](examples/Air_Local_models.png)
 
+或者你可以直接连接**Mflux Models Downloader**节点以从Huggingface下载4bit模型，比如：
+
+![text2img](examples/Air_Downloaded_models.png)
+
+或者你也可以使用完整版的黑森林模型通过**Mflux Custom Models**来打造那你的专属模型：
+
+比如默认量化版，这和Huggingface下载的基础版量化模型是一样的：
+
+![text2img](examples/Air_Custom_models_default.png)
+
+比如LORA叠加版，这可以在叠加LORA后再进行量化，从而使模型成为一种独特模型：
+
+![text2img](examples/Air_Custom_models_loras.png)
+
+这种LORA定制模型的坏处是它本质仍然属于量化模型，你想在**Quick MFlux Generation**里继续叠加Loras的话，它就会报错。
+
+但是，如果你想要快速生成同一种lora风格的多张图片，并且您的机器配置不是很高，比如我的16GB，那么使用这种方法可以当做实现Lora的折中方案，生图完成的时候可以直接删除这种独特模型。
+
+**注意**
+
+**Mflux Custom Models**节点中的custom_identifier不是必填项，如果不需要特定表示作区分，完全可以选择留空。
+
 
 **Mflux Pro：**
+
+
+Loras:
 
 ![Loras](examples/Pro_Loras.png)
 
@@ -92,11 +125,11 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 注意使用Lora的时候同样可以用**Mflux Models Loader**节点加载本地模型，但仅限完整版模型，如果模型列表中选择了量化模型，那样将会报错。
 
 
+ControlNet:
 
 ![ControlNet](examples/Pro_ControlNet.png)
 
 Mflux的ControlNet，目前仅支持Canny
-
 
 
 **Mflux Plus：**
@@ -120,6 +153,7 @@ Mflux的ControlNet，目前仅支持Canny
 
  **Quick MFlux Generation** 节点中的metadata选项，如果它是true值（默认false），那么生成的图像将被保存到 **ComfyUI/output/Mflux** 中，同时带有图像同名的json文件，里面包含了该图像的几乎一切生成参数。
  我个人比较喜欢打开metadata为true，同时连接预览节点而不是保存节点，这样的好处是不会重复保存，而且如果日后要检索某图片的信息，可以直接json文件中查阅，方便复刻图像。
+ 因此这次更新中，metadata被我默认打开，如果需要关闭，只需一个点击。
 
 ### 可能的探索
 
@@ -131,14 +165,23 @@ Mflux的ControlNet，目前仅支持Canny
 
 ......
 
-这里还是希望大佬们多分享工作流程，充分发扬互联网的共享精神，知识付费？不，我要拿来主义。
+这里还是希望大佬们多分享工作流程，充分发扬互联网的共享精神，知识付费？不，我主张合作分享，互惠共赢。
 
 ## 规划
 
-下一步的目标是mflux的最后一块拼图，保存专属模型。
+目前已完成了Mflux0.3.0的全部功能。请留意官网的更新：
+
+https://github.com/filipstrand/mflux
+
+完成Mflux0.3.0的这些工作时，我给了自己一颗星。新手项目同样需要勉励。
 
 ## 贡献
+
 我是编码新手，这是我的第一个GitHub项目。我原本的规划十分宏大，比如实现mflux的Lora以及ControlNet功能（目前已实现Mflux ControNet仅Canny，还有Lora），以及实现ComfyUI的精髓理念——即拆分节点以让用户能够深入了解flux的底层逻辑……但我粗浅的代码能力限制了我的蓝图。如果有高手能够帮忙实现这些，我十分感谢。在此问好。
+
+其他的贡献应当包括问题反馈，因为我惊奇地发觉这个项目居然到目前为止都是0反馈，而我有时难免疏漏，无法发现问题。比如之前曾经丢失过“}”符号，并且出现过models/Mflux目录没被自动创建的错误。此外我在ComfyUI官网上发现了一个反馈，即OS15可能不能使用。
+
+“}”符号的解决是@eLenoAr及时提醒了我，虽然不是通过issues渠道，但同样感谢@eLenoAr在代码下的留言反馈。
 
 ## 许可证
 我想采用和mflux项目一致的MIT麻省理工许可，也算为开源贡献一份心力吧。
