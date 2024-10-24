@@ -110,7 +110,7 @@ However, if you wish to quickly generate multiple images of the same LORA style 
 
 **Note**
 
-Whether downloading models from Hugging Face or creating custom exclusive models, they only need to be run once. As long as you save the model, you can use the**Mflux Models Loader** node to retrieve them.
+Whether downloading models from Hugging Face or creating custom exclusive models, they only need to be run once. As long as you save the model, you can use the **Mflux Models Loader** node to retrieve them.
 
 The **custom_identifier** in the **Mflux Custom Models** node is not a required field. If you don’t need a specific identifier for differentiation, you can leave it blank.
 

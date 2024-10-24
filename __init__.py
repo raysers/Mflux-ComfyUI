@@ -1,5 +1,5 @@
-from .MfluxAir import QuickMfluxNode, MfluxModelsLoader, MfluxModelsDownloader, MfluxCustomModels
-from .MfluxPro import MfluxLorasLoader, MfluxControlNetLoader
+from .Mflux_Air import QuickMfluxNode, MfluxModelsLoader, MfluxModelsDownloader, MfluxCustomModels
+from .Mflux_Pro import MfluxLorasLoader, MfluxControlNetLoader
 
 NODE_CLASS_MAPPINGS = {
     "QuickMfluxNode": QuickMfluxNode,

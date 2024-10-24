@@ -52,9 +52,9 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 **需要注意：**
 
-ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux**”目录下并且使用**Mflux Models Loader**节点加载，可以直接使用跳过下载流程。
+如果ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux**”目录下并且使用**Mflux Models Loader**节点加载，可以直接使用跳过下载流程。
 
-当然，如果对Lora的需求不大，仍然推荐继续使用之前的4BIT量化模型，只要它还在以前版本的预设路径“**models/Mflux**”目录下，那么就可以在**Mflux Models Loader**节点列表中自由选择。
+当然，如果对Lora的需求不大，仍然推荐继续使用之前的4BIT量化模型，只要它还在先前版本的预设路径“**models/Mflux**”目录下，那么就可以在**Mflux Models Loader**节点列表中自由选择。
 
 同时此次更新几乎涵盖了模型的全部加载方式，让各种需求的用户都能实现模型自由。我本人推荐的仍然是4bit Schnell 2step,在我的M1 Pro 16GB上实现了20+秒生图。
 
@@ -82,7 +82,7 @@ ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux*
 
 ![text2img](examples/Air.png)
 
-这个流程将会从Huggingface下载完整版的dev或schnell到.cache里。
+这个流程将会从Huggingface下载完整版的dev或schnell到`.cache`里。
 
 如果你的完整版dev或schnell已经移动到models/Mflux，此时外接一个**Mflux Models Loader**选择你的完整版dev或schnell，那么不会触发下载，会直接使用你本地的完整版模型。
 
@@ -104,7 +104,7 @@ ComfyUI里已经有FLUX完整模型，可以把模型移动到“**models/Mflux*
 
 ![text2img](examples/Air_Custom_models_loras.png)
 
-这种LORA定制模型的坏处是它本质仍然属于量化模型，你想在**Quick MFlux Generation**里继续叠加Loras的话，它就会报错。
+这种LORA定制模型的不足是它本质仍然属于量化模型，你想在**Quick MFlux Generation**里继续叠加Loras的话，它就会报错。
 
 但是，如果你想要快速生成同一种lora风格的多张图片，并且您的机器配置不是很高，比如我的16GB，那么使用这种方法可以当做实现Lora的折中方案，生图完成的时候可以直接删除这种独特模型。
 

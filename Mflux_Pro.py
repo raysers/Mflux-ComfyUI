@@ -91,7 +91,7 @@ class MfluxControlNetLoader:
                 "image": (sorted(files), {"image_upload": True}),
                 "model_selection": (controlnet_models, {"default": "InstantX/FLUX.1-dev-Controlnet-Canny"}),
                 "strength": ("FLOAT", {"default": 0.4, "min": 0.0, "max": 1.0}),
-                "save_canny": (["true", "false"], {"default": "false"}),
+                "save_canny": ("BOOLEAN", {"default": False, "label_on": "True", "label_off": "False"}),
             }
         }
 

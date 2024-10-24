@@ -12,7 +12,7 @@ from mflux.config.model_config import ModelConfig
 from mflux.config.config import Config, ConfigControlnet
 from mflux.flux.flux import Flux1
 from mflux.controlnet.flux_controlnet import Flux1Controlnet
-from .MfluxPro import MfluxControlNetPipeline  
+from .Mflux_Pro import MfluxControlNetPipeline
 
 flux_cache = {}
 
@@ -43,12 +43,17 @@ create_directory(mflux_dir)
 def get_full_model_path(model_dir, model_name):
     return os.path.join(model_dir, model_name)
 
+def get_lora_info(Loras):
+    if Loras:
+        return Loras.lora_paths, Loras.lora_scales
+    return [], []
+
 def download_hg_model(model_version):
     model_checkpoint = get_full_model_path(mflux_dir, model_version)  
     if not os.path.exists(model_checkpoint):
         print(f"Downloading model {model_version} to {model_checkpoint}...")
         try:
-            snapshot_download(repo_id=f"madroid/{model_version}", local_dir=model_checkpoint, local_dir_use_symlinks=False)
+            snapshot_download(repo_id=f"madroid/{model_version}", local_dir=model_checkpoint)
         except Exception as e:
             print(f"Error downloading model {model_version}: {e}")
             return None
@@ -66,16 +71,49 @@ class MfluxModelsDownloader:
         }
 
     RETURN_TYPES = ("PATH",)
-    RETURN_NAMES = ("Downloaded_models",)
+    RETURN_NAMES = ("Downloaded_model",)
     CATEGORY = "Mflux/Air"
     FUNCTION = "download_model"
 
     def download_model(self, model_version):
-        full_model_id = f"madroid/{model_version}"
         model_path = download_hg_model(model_version)
         if model_path:
             return (model_path,)  
         return (None,)
+    
+class MfluxCustomModels:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model": (["dev", "schnell"], {"default": "schnell"}),
+                "quantize": (["4", "8"], {"default": "4"}),
+            },
+            "optional": {
+                "Loras": ("MfluxLorasPipeline",),
+                "custom_identifier": ("STRING", {"default": "", "tooltip": "Custom identifier for the model."}),
+            }
+        }
+
+    RETURN_TYPES = ("PATH",)
+    RETURN_NAMES = ("Custom_model",)
+    CATEGORY = "Mflux/Air"
+    FUNCTION = "save_model"
+
+    def save_model(self, model, quantize, Loras=None, custom_identifier=""):
+        identifier = custom_identifier if custom_identifier else "default"
+        save_dir = get_full_model_path(mflux_dir, f"Mflux-{model}-{quantize}bit-{identifier}")
+        create_directory(save_dir)
+        print(f"Saving model: {model}, quantize: {quantize}, save_dir: {save_dir}")
+        lora_paths, lora_scales = get_lora_info(Loras)
+        if lora_paths:
+            print(f"LoRA paths: {lora_paths}")
+            print(f"LoRA scales: {lora_scales}")
+        model_config = ModelConfig.from_alias(model)
+        flux = Flux1(model_config=model_config, quantize=int(quantize), lora_paths=lora_paths, lora_scales=lora_scales)
+        flux.save_model(save_dir)
+        print(f"Model saved to {save_dir}")
+        return (save_dir,)
 
 class MfluxModelsLoader:
     @classmethod
@@ -87,7 +125,7 @@ class MfluxModelsLoader:
         }
 
     RETURN_TYPES = ("PATH",)
-    RETURN_NAMES = ("Local_models",)
+    RETURN_NAMES = ("Local_model",)
     CATEGORY = "Mflux/Air"
     FUNCTION = "load"
 
@@ -116,7 +154,7 @@ class QuickMfluxNode:
                 "metadata": ("BOOLEAN", {"default": True, "label_on": "True", "label_off": "False"}),
             },
             "optional": {
-                "Local_models": ("PATH",),
+                "Local_model": ("PATH",),
                 "Loras": ("MfluxLorasPipeline",),
                 "ControlNet": ("MfluxControlNetPipeline",),
             }
@@ -126,37 +164,30 @@ class QuickMfluxNode:
     CATEGORY = "Mflux/Air"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_models="", Loras=None, ControlNet=None):
-        model = "dev" if "dev" in Local_models.lower() else "schnell" if "schnell" in Local_models.lower() else model
-
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", Loras=None, ControlNet=None):
+        
+        model = "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model
         print(f"Using model: {model}")
-        print(f"Local model path: {Local_models}")
-
+        print(f"Local model path: {Local_model}")
+        lora_paths, lora_scales = get_lora_info(Loras)
         if Loras:
-            print(f"LORA paths: {Loras.lora_paths}")
-            print(f"LORA scales: {Loras.lora_scales}")
+            print(f"LoRA paths: {Loras.lora_paths}")
+            print(f"LoRA scales: {Loras.lora_scales}")
 
         image_path, save_canny, strength = None, None, None
-        
         if ControlNet:
             if isinstance(ControlNet, MfluxControlNetPipeline):
                 image_path = ControlNet.image_path
                 save_canny = ControlNet.save_canny
                 strength = ControlNet.strength
-
         is_controlnet = ControlNet is not None
 
         quantize = None if quantize == "None" else int(quantize)
-
         seed = random.randint(0, 0xffffffffffffffff) if seed == -1 else int(seed)
         print(f"Using seed: {seed}")
-
         steps = min(max(steps, 2), 4) if model == "schnell" else steps
-
-        lora_paths = Loras.lora_paths if Loras else []
-        lora_scales = Loras.lora_scales if Loras else []
         
-        flux = load_or_create_flux(model, quantize, Local_models if Local_models else None, lora_paths, lora_scales, is_controlnet)
+        flux = load_or_create_flux(model, quantize, Local_model if Local_model else None, lora_paths, lora_scales, is_controlnet)
 
         output_image_path = (
             f"{get_output_directory()}/generated_image.png"
@@ -192,17 +223,15 @@ class QuickMfluxNode:
 
         inner_image = image.image
         tensor_image = torch.from_numpy(np.array(inner_image).astype(np.float32) / 255.0)
-
         if tensor_image.dim() == 3:
             tensor_image = tensor_image.unsqueeze(0)
 
         if metadata:
-            self.save_images([inner_image], prompt, model, Local_models, seed, height, width, steps, guidance, lora_paths=lora_paths, lora_scales=lora_scales)
+            self.save_images([inner_image], prompt, model, Local_model, seed, height, width, steps, guidance, lora_paths=lora_paths, lora_scales=lora_scales)
 
-        print(f"Generated tensor image with shape: {tensor_image.shape}, dtype: {tensor_image.dtype}")
         return (tensor_image,)
     
-    def save_images(self, images, prompt, model, Local_models, seed, height, width, steps, guidance, lora_paths=None, lora_scales=None, filename_prefix="Mflux"):
+    def save_images(self, images, prompt, model, Local_model, seed, height, width, steps, guidance, lora_paths=None, lora_scales=None, filename_prefix="Mflux"):
         output_dir = get_output_directory()
         mflux_output_dir = os.path.join(output_dir, "Mflux")
         create_directory(mflux_output_dir)
@@ -226,7 +255,7 @@ class QuickMfluxNode:
             metadata = {
                 "prompt": prompt,
                 "model": model,
-                "Local_models": os.path.basename(Local_models),
+                "Local_model": os.path.basename(Local_model),
                 "seed": seed,
                 "height": height,
                 "width": width,
@@ -248,42 +277,3 @@ class QuickMfluxNode:
             next_index += 1
 
         return results
-
-class MfluxCustomModels:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "model": (["dev", "schnell"], {"default": "schnell"}),
-                "quantize": (["4", "8"], {"default": "4"}),
-            },
-            "optional": {
-                "Loras": ("MfluxLorasPipeline",),
-                "custom_identifier": ("STRING", {"default": "", "tooltip": "Custom identifier for the model."}),
-            }
-        }
-
-    RETURN_TYPES = ("PATH",)
-    RETURN_NAMES = ("Custom_models",)
-    CATEGORY = "Mflux/Air"
-    FUNCTION = "save_model"
-
-    def save_model(self, model, quantize, Loras=None, custom_identifier=""):
-        identifier = custom_identifier if custom_identifier else "default"
-        save_dir = get_full_model_path(mflux_dir, f"Mflux-{model}-{quantize}bit-{identifier}")
-        create_directory(save_dir)
-
-        print(f"Saving model: {model}, quantize: {quantize}, save_dir: {save_dir}")
-
-        lora_paths = Loras.lora_paths if Loras else []
-        lora_scales = Loras.lora_scales if Loras else []
-        print(f"LORA paths: {lora_paths}")
-        print(f"LORA scales: {lora_scales}")
-
-        model_config = ModelConfig.from_alias(model)
-        flux = Flux1(model_config=model_config, quantize=int(quantize), lora_paths=lora_paths, lora_scales=lora_scales)
-        flux.save_model(save_dir)
-
-        print(f"Model saved to {save_dir}")
-
-        return (save_dir,)
