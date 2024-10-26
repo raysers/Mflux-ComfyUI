@@ -49,11 +49,12 @@ def get_lora_info(Loras):
     return [], []
 
 def download_hg_model(model_version):
+    repo_id = f"madroid/{model_version}" if "4bit" in model_version else f"AITRADER/{model_version}"
     model_checkpoint = get_full_model_path(mflux_dir, model_version)  
     if not os.path.exists(model_checkpoint):
         print(f"Downloading model {model_version} to {model_checkpoint}...")
         try:
-            snapshot_download(repo_id=f"madroid/{model_version}", local_dir=model_checkpoint)
+            snapshot_download(repo_id=repo_id, local_dir=model_checkpoint)
         except Exception as e:
             print(f"Error downloading model {model_version}: {e}")
             return None
@@ -66,7 +67,7 @@ class MfluxModelsDownloader:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model_version": (["flux.1-schnell-mflux-4bit", "flux.1-dev-mflux-4bit"], {"default": "flux.1-schnell-mflux-4bit"}),
+                "model_version": (["flux.1-schnell-mflux-4bit", "flux.1-dev-mflux-4bit", "MFLUX.1-schnell-8-bit", "MFLUX.1-dev-8-bit"], {"default": "flux.1-schnell-mflux-4bit"}),
             }
         }
 

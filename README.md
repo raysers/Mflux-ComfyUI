@@ -32,14 +32,16 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 **About This Update:**
 
-1. The previously abandoned Hugging Face automatic download feature has been restored, allowing users to directly download existing Mflux 4-bit models. If any users can provide an 8-bit version, it will also be added to the list in the next update.
+1. Restored the Huggingface auto-download feature that was previously removed, enabling users to directly download the existing Mflux 4-bit models.
+   
+   Based on the discussions in issue #04, an 8-bit version has been added to address the difficulty of manual downloads. Now, all quantized models can be downloaded directly through the **Mflux Models Downloader** node.
 
-   ps. I previously attempted to upload the 8-bit version, but the upload speed of 70~80 KB ultimately led me to abandon the effort. My apologies, everyone.
-
-   Here are the manual download links for the 4-bit versions:
+   Here are the manual download links for all quantized versions:
 
    - [madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
    - [madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
+   - [AITRADER/MFLUX.1-schnell-8-bit](https://huggingface.co/AITRADER/MFLUX.1-schnell-8-bit)
+   - [AITRADER/MFLUX.1-dev-8-bit](https://huggingface.co/AITRADER/MFLUX.1-dev-8-bit)
 
 2. I have attempted to complete the final piece of the puzzle for Mflux 0.3.0, which allows users to save their exclusive models. With this feature, as long as you have the complete native Black Forest model saved in your `.cache`, you can customize your own exclusive model by setting parameters. This makes downloading less necessary, as you can create it yourself.
 
@@ -51,9 +53,7 @@ I typically create a folder named Mflux under **models/loras** to keep track of 
 
 **Important Note:**
 
-To avoid wasting resources by downloading repeatedly, if you already have the full FLUX model in ComfyUI, you can move the model to the "**models/Mflux**" directory and use the **Mflux Models Loader** node to load it, allowing you to bypass the download process.
-
-Of course, if you don't have a strong need for Lora, it is still recommended to continue using the previous 4BIT quantized model. As long as it remains in the old version's preset path in the "**models/Mflux**" directory, you can freely choose it from the **Mflux Models Loader** node list.
+If you don't have a strong need for Lora, it is still recommended to continue using the previous 4BIT quantized model. As long as it remains in the old version's preset path in the "**models/Mflux**" directory, you can freely choose it from the **Mflux Models Loader** node list.
 
 Additionally, this update covers nearly all loading methods for models, allowing users with various needs to use models freely. I personally recommend the 4-bit Schnell 2-step, which achieved over 20+ seconds of raw image generation on my M1 Pro 16GB.
 
@@ -82,11 +82,9 @@ Or double-click in the blank area of the canvas to bring up the node search box,
 
 ![text2img](examples/Air.png)
 
-This process will download the full version of dev or schnell to .cache from Huggingface.
+This process will download the full version of dev or schnell to `.cache` from Huggingface.
 
-If your full version of dev or schnell has already been moved to models/Mflux, connecting an **Mflux Models Loader** and selecting your full version of dev or schnell will not trigger a download and will use your local full version model directly.
-
-Alternatively, the external node can be used to continue loading the 4BIT quantized model, such as:
+Alternatively, the external node can be used to continue loading the quantized models, such as:
 
 ![text2img](examples/Air_Local_models.png)
 
