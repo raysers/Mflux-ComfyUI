@@ -101,7 +101,6 @@ class MfluxControlNetLoader:
     FUNCTION = "load_and_select"
 
     def load_and_select(self, image, model_selection, strength, save_canny):
-        save_canny_bool = save_canny == "true"
         image_path = folder_paths.get_annotated_filepath(image)
 
         with Image.open(image_path) as img:
@@ -113,7 +112,7 @@ class MfluxControlNetLoader:
             if canny_tensor.dim() == 3:
                 canny_tensor = canny_tensor.unsqueeze(0)
 
-        return MfluxControlNetPipeline(image_path, model_selection, strength, save_canny_bool), width, height, canny_tensor
+        return MfluxControlNetPipeline(image_path, model_selection, strength, save_canny), width, height, canny_tensor
 
     @classmethod
     def IS_CHANGED(cls, image, model_selection, strength, save_canny):
@@ -133,7 +132,7 @@ class MfluxControlNetLoader:
         if not isinstance(strength, (int, float)):
             return "Strength must be a number"
 
-        if save_canny not in ["true", "false"]:
-            return "save_canny must be 'true' or 'false'"
+        if not isinstance(save_canny, bool):
+            return "save_canny must be a boolean value"
 
         return True
