@@ -6,6 +6,57 @@ import torch
 
 from mflux.controlnet.controlnet_util import ControlnetUtil
 
+class MfluxImagePipeline:
+    def __init__(self, image_path, strength):
+        self.image_path = image_path
+        self.strength = strength
+
+    def clear_cache(self):
+        self.image_path = None
+        self.strength = None
+
+class MfluxLodeImage:
+    @classmethod
+    def INPUT_TYPES(cls):
+        input_dir = folder_paths.get_input_directory()
+        files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+
+        return {
+            "required": {
+                "image": (sorted(files), {"image_upload": True}),
+                "strength": ("FLOAT", {"default": 0.4, "min": 0.0, "max": 1.0, "step": 0.01}),
+            }
+        }
+
+    CATEGORY = "Mflux/Pro"
+    RETURN_TYPES = ("MfluxImagePipeline", "INT", "INT")
+    RETURN_NAMES = ("image", "width", "height")
+    FUNCTION = "load_and_process"
+
+    def load_and_process(self, image, strength):
+        image_path = folder_paths.get_annotated_filepath(image)
+
+        with Image.open(image_path) as img:
+            width, height = img.size
+
+        return MfluxImagePipeline(image_path, strength), width, height
+
+    @classmethod
+    def IS_CHANGED(cls, image, strength):
+        image_hash = hash(image)
+        strength_rounded = round(float(strength), 2)
+        return (image_hash, strength_rounded)
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, image, strength):
+        if not folder_paths.exists_annotated_filepath(image):
+            return "Invalid image file: {}".format(image)
+
+        if not isinstance(strength, (int, float)):
+            return "Strength must be a number"
+
+        return True
+
 class MfluxLorasPipeline:
     def __init__(self, lora_paths, lora_scales):
         self.lora_paths = lora_paths
@@ -64,64 +115,62 @@ class MfluxLorasLoader:
         return (MfluxLorasPipeline(list(lora_paths), list(lora_scales)),)
 
 class MfluxControlNetPipeline:
-    def __init__(self, image_path, model_selection, strength, save_canny=False):
-        self.image_path = image_path
+    def __init__(self, model_selection, save_canny=False):
         self.model_selection = model_selection
-        self.strength = strength
         self.save_canny = save_canny
 
     def clear_cache(self):
-        self.image_path = None
         self.model_selection = None
-        self.strength = None
         self.save_canny = False
 
 class MfluxControlNetLoader:
     @classmethod
     def INPUT_TYPES(cls):
-        input_dir = folder_paths.get_input_directory()
-        files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
-
         controlnet_models = [
             "InstantX/FLUX.1-dev-Controlnet-Canny",
         ]
 
         return {
             "required": {
-                "image": (sorted(files), {"image_upload": True}),
                 "model_selection": (controlnet_models, {"default": "InstantX/FLUX.1-dev-Controlnet-Canny"}),
-                "strength": ("FLOAT", {"default": 0.4, "min": 0.0, "max": 1.0}),
                 "save_canny": ("BOOLEAN", {"default": False, "label_on": "True", "label_off": "False"}),
+            },
+            "optional": {
+                "image": ("MfluxImagePipeline", ),
             }
         }
 
     CATEGORY = "Mflux/Pro"
-    RETURN_TYPES = ("MfluxControlNetPipeline", "INT", "INT", "IMAGE")
-    RETURN_NAMES = ("ControlNet", "width", "height", "canny_image")
+    RETURN_TYPES = ("MfluxControlNetPipeline", "IMAGE")
+    RETURN_NAMES = ("ControlNet", "preprocessed_image")
     FUNCTION = "load_and_select"
 
-    def load_and_select(self, image, model_selection, strength, save_canny):
-        image_path = folder_paths.get_annotated_filepath(image)
+    def load_and_select(self, model_selection, save_canny, image=None):
+        
+        image_path = None
+        strength = None
+        if image:
+            image_path = image.image_path
+            strength = image.strength
 
         with Image.open(image_path) as img:
-            width, height = img.size
             canny_image = ControlnetUtil.preprocess_canny(img)
             canny_image_np = np.array(canny_image).astype(np.float32) / 255.0
             canny_tensor = torch.from_numpy(canny_image_np)
-            
+
             if canny_tensor.dim() == 3:
                 canny_tensor = canny_tensor.unsqueeze(0)
 
-        return MfluxControlNetPipeline(image_path, model_selection, strength, save_canny), width, height, canny_tensor
+        return MfluxControlNetPipeline(model_selection, save_canny), canny_tensor
 
     @classmethod
-    def IS_CHANGED(cls, image, model_selection, strength, save_canny):
-        return str(image) + str(model_selection) + str(strength) + str(save_canny)
+    def IS_CHANGED(cls, image, model_selection, save_canny):
+        return str(image.image_path) + str(model_selection) + str(save_canny)
 
     @classmethod
-    def VALIDATE_INPUTS(cls, image, model_selection, strength, save_canny):
-        if not folder_paths.exists_annotated_filepath(image):
-            return "Invalid image file: {}".format(image)
+    def VALIDATE_INPUTS(cls, image, model_selection, save_canny):
+        if image and not folder_paths.exists_annotated_filepath(image.image_path):
+            return "Invalid image file: {}".format(image.image_path)
 
         available_models = [
             "InstantX/FLUX.1-dev-Controlnet-Canny",
@@ -129,10 +178,10 @@ class MfluxControlNetLoader:
         if model_selection not in available_models:
             return f"Invalid model selection: {model_selection}"
 
-        if not isinstance(strength, (int, float)):
-            return "Strength must be a number"
-
         if not isinstance(save_canny, bool):
             return "save_canny must be a boolean value"
 
         return True
+
+
+

@@ -22,9 +22,9 @@ https://github.com/filipstrand/mflux
 ## 安装指南
 1. cd /path/to/your_ComfyUI
 2. 激活虚拟环境
-3. cd custom_nodes
+3. `cd custom_nodes`
 4. `git clone https://github.com/raysers/Mflux-ComfyUI.git`
-5. pip install mflux==0.3.0
+5. `pip install mflux==0.4.1`
 6. 重启ComfyUI
 
 或者，从ComfyUI-Manager中直接搜索“Mflux-ComfyUI”来快速安装。
@@ -33,31 +33,12 @@ https://github.com/filipstrand/mflux
 
 **关于本次更新：**
 
-1.找回了上次更新所放弃的Huggingface自动下载功能，方便用户直接下载既有的Mflux 4bit模型。
+1.图生图
+2.重构ControlNet流程
 
-同时根据issue#04中的探讨，添加了8bit的版本，解决用户手动下载的难题，现在所有量化模型皆可通过**Mflux Models Downloader**节点来直接下载。
+mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI中升级：
 
-这里也给出所有量化版本的手动下载地址：
-
-- [madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
-- [madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
-- [AITRADER/MFLUX.1-schnell-8-bit](https://huggingface.co/AITRADER/MFLUX.1-schnell-8-bit)
-- [AITRADER/MFLUX.1-dev-8-bit](https://huggingface.co/AITRADER/MFLUX.1-dev-8-bit)
-
-
-2.尝试补全了Mflux0.3.0的最后一块拼图，即保存用户专属模型。拥有了这个功能，只要您的.cache中保存有完整的黑森林原生模型，您就可以设置参数来自由定制属于您自己的专属模型。下载也就变得鸡肋了，因为自己动手丰衣足食。
-
-**往期更新回顾：**
-
-ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进目录里，**Mflux Loras Loader**节点将自动检索。
-
-我的习惯是在**models/loras**下新建Mflux文件夹，用来检测Mflux所能适配的LORA，统一存放其中，因此在我的节点中，检索出来的应该是Mflux/*******.safetensors
-
-**需要注意：**
-
-如果对Lora的需求不大，仍然推荐继续使用之前的4BIT量化模型，只要它仍在先前版本的预设路径“**models/Mflux**”目录下，那么就可以在**Mflux Models Loader**节点列表中自由选择。
-
-同时此次更新几乎涵盖了模型的全部加载方式，让各种需求的用户都能实现模型自由。我本人推荐的仍然是4bit Schnell 2step,在我的M1 Pro 16GB上实现了20+秒生图。
+`pip install --upgrade mflux`
 
 ## 使用说明
 
@@ -72,6 +53,7 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 **Mflux/Pro**下：
 
+- **Mflux Lode Image**
 - **Mflux Loras Loader**
 - **Mflux ControlNet Loader**
 
@@ -80,6 +62,8 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 ### 流程
 
 **Mflux Air：**
+
+text2img:
 
 ![text2img](examples/Air.png)
 
@@ -93,7 +77,7 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 
 ![text2img](examples/Air_Downloaded_models.png)
 
-或者你也可以使用完整版的黑森林模型通过**Mflux Custom Models**来打造那你的专属模型：
+或者你也可以使用完整版的黑森林模型通过**Mflux Custom Models**来打造你的专属模型：
 
 比如默认量化版，这和Huggingface下载的基础版量化模型是一样的：
 
@@ -114,6 +98,13 @@ ComfyUI的loras存放路径是**models/loras**，需要手动将LORA文件放进
 **Mflux Custom Models**节点中的custom_identifier不是必填项，如果不需要特定表示作区分，完全可以选择留空。
 
 
+img2img:
+
+![img2img](examples/Air_img2img.png)
+
+具体的使用方式我也仍在探索中，如果有使用心得值得分享，欢迎在issues里开贴探讨。
+
+
 **Mflux Pro：**
 
 
@@ -128,9 +119,11 @@ Loras:
 
 ControlNet:
 
-![ControlNet](examples/Pro_ControlNet.png)
+![ControlNet](examples/Pro_ControlNet_new.png)
 
 Mflux的ControlNet，目前仅支持Canny
+
+Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一个专属模型。
 
 
 **Mflux Plus：**

@@ -156,6 +156,7 @@ class QuickMfluxNode:
             },
             "optional": {
                 "Local_model": ("PATH",),
+                "image": ("MfluxImagePipeline",), 
                 "Loras": ("MfluxLorasPipeline",),
                 "ControlNet": ("MfluxControlNetPipeline",),
             }
@@ -165,44 +166,49 @@ class QuickMfluxNode:
     CATEGORY = "Mflux/Air"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", Loras=None, ControlNet=None):
-        
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None):
         model = "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model
         print(f"Using model: {model}")
-        print(f"Local model path: {Local_model}")
+
+        if image:
+            image_path = image.image_path
+            strength = image.strength
+        else:
+            image_path, strength = None, None
+
         lora_paths, lora_scales = get_lora_info(Loras)
         if Loras:
             print(f"LoRA paths: {Loras.lora_paths}")
             print(f"LoRA scales: {Loras.lora_scales}")
 
-        image_path, save_canny, strength = None, None, None
-        if ControlNet:
-            if isinstance(ControlNet, MfluxControlNetPipeline):
-                image_path = ControlNet.image_path
-                save_canny = ControlNet.save_canny
-                strength = ControlNet.strength
-        is_controlnet = ControlNet is not None
+        ControlNet_model_selection, save_canny = None, None
+        if ControlNet and isinstance(ControlNet, MfluxControlNetPipeline):
+            ControlNet_model_selection = ControlNet.model_selection
+            save_canny = ControlNet.save_canny
 
         quantize = None if quantize == "None" else int(quantize)
         seed = random.randint(0, 0xffffffffffffffff) if seed == -1 else int(seed)
         print(f"Using seed: {seed}")
         steps = min(max(steps, 2), 4) if model == "schnell" else steps
         
-        flux = load_or_create_flux(model, quantize, Local_model if Local_model else None, lora_paths, lora_scales, is_controlnet)
+        flux = load_or_create_flux(model, quantize, Local_model if Local_model else None, lora_paths, lora_scales, ControlNet is not None)
 
         output_image_path = (
-            f"{get_output_directory()}/generated_image.png"
-            if is_controlnet and save_canny == "true"
+            f"{get_output_directory()}/canny_image.png"
+            if ControlNet and save_canny == "true"
             else None
         )
 
-        config_class = ConfigControlnet if is_controlnet else Config
+        config_class = ConfigControlnet if ControlNet else Config
         config = config_class(
             num_inference_steps=steps,
             height=height,
             width=width,
             guidance=guidance,
-            **({"controlnet_strength": strength} if is_controlnet else {})
+            **({"controlnet_strength": strength} if ControlNet else {
+                "init_image_path": image_path, 
+                "init_image_strength": strength
+            })
         )
 
         generate_args = {
@@ -211,7 +217,9 @@ class QuickMfluxNode:
             "config": config
         }
 
-        if is_controlnet:
+        if ControlNet:
+            if image_path is None:
+                raise ValueError("ControlNet image path is None, please check if the path is valid.")
             generate_args["controlnet_image_path"] = image_path
             generate_args["controlnet_save_canny"] = save_canny
 
@@ -220,19 +228,20 @@ class QuickMfluxNode:
             else:
                 generate_args["output"] = ""
 
-        image = flux.generate_image(**generate_args)
-
-        inner_image = image.image
+        generated_image = flux.generate_image(**generate_args)
+        inner_image = generated_image.image
         tensor_image = torch.from_numpy(np.array(inner_image).astype(np.float32) / 255.0)
         if tensor_image.dim() == 3:
             tensor_image = tensor_image.unsqueeze(0)
 
         if metadata:
-            self.save_images([inner_image], prompt, model, Local_model, seed, height, width, steps, guidance, lora_paths=lora_paths, lora_scales=lora_scales)
+            self.save_images([inner_image], prompt, model, Local_model, seed, height, width, steps, guidance, 
+                             lora_paths=lora_paths, lora_scales=lora_scales, image_path=image_path, strength=strength, controlnet_model=ControlNet_model_selection)
 
         return (tensor_image,)
     
-    def save_images(self, images, prompt, model, Local_model, seed, height, width, steps, guidance, lora_paths=None, lora_scales=None, filename_prefix="Mflux"):
+    def save_images(self, images, prompt, model, Local_model, seed, height, width, steps, guidance, 
+                    lora_paths=None, lora_scales=None, image_path=None, strength=None, controlnet_model=None, filename_prefix="Mflux"):
         output_dir = get_output_directory()
         mflux_output_dir = os.path.join(output_dir, "Mflux")
         create_directory(mflux_output_dir)
@@ -264,6 +273,9 @@ class QuickMfluxNode:
                 "guidance": guidance,
                 "lora_paths": [os.path.basename(path) for path in lora_paths],
                 "lora_scales": lora_scales,
+                "image_path": image_path,
+                "strength": strength,
+                "controlnet_model": controlnet_model
             }
 
             metadata_filename = get_full_model_path(mflux_output_dir, f"{filename_prefix}_{next_index:05}.json")

@@ -23,7 +23,7 @@ Thanks also to **@CharafChnioune**, the author of [**MFLUX-WEBUI**](https://gith
 2. Activate the virtual environment
 3. `cd custom_nodes`
 4. `git clone https://github.com/raysers/Mflux-ComfyUI.git`
-5. `pip install mflux==0.3.0`
+5. `pip install mflux==0.4.1`
 6. Restart ComfyUI
 
 Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick installation.
@@ -32,30 +32,12 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 **About This Update:**
 
-1. Restored the Huggingface auto-download feature that was previously removed, enabling users to directly download the existing Mflux 4-bit models.
-   
-   Based on the discussions in issue #04, an 8-bit version has been added to address the difficulty of manual downloads. Now, all quantized models can be downloaded directly through the **Mflux Models Downloader** node.
+1.Image-to-image
+2.Refactor ControlNet workflow
 
-   Here are the manual download links for all quantized versions:
+mflux has been updated to version 0.4.1. To experience image-to-image generation, please upgrade in ComfyUI with:
 
-   - [madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
-   - [madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
-   - [AITRADER/MFLUX.1-schnell-8-bit](https://huggingface.co/AITRADER/MFLUX.1-schnell-8-bit)
-   - [AITRADER/MFLUX.1-dev-8-bit](https://huggingface.co/AITRADER/MFLUX.1-dev-8-bit)
-
-2. I have attempted to complete the final piece of the puzzle for Mflux 0.3.0, which allows users to save their exclusive models. With this feature, as long as you have the complete native Black Forest model saved in your `.cache`, you can customize your own exclusive model by setting parameters. This makes downloading less necessary, as you can create it yourself.
-
-**Previous Update:**
-
-The LORA storage path in ComfyUI is **models/loras**, and LORA files need to be manually placed in this directory. The **Mflux Loras Loader** node will automatically search for them.
-
-I typically create a folder named Mflux under **models/loras** to keep track of the compatible LORAs for Mflux, thus unifying storage. Therefore, in my node, the retrieved files should appear as Mflux/*******.safetensors.
-
-**Important Note:**
-
-If you don't have a strong need for Lora, it is still recommended to continue using the previous 4BIT quantized model. As long as it remains in the old version's preset path in the "**models/Mflux**" directory, you can freely choose it from the **Mflux Models Loader** node list.
-
-Additionally, this update covers nearly all loading methods for models, allowing users with various needs to use models freely. I personally recommend the 4-bit Schnell 2-step, which achieved over 20+ seconds of raw image generation on my M1 Pro 16GB.
+`pip install --upgrade mflux`
 
 ## Usage Instructions
 
@@ -70,6 +52,7 @@ Under **Mflux/Air**:
 
 Under **Mflux/Pro**:
 
+- **Mflux Lode Image**
 - **Mflux Loras Loader**  
 - **Mflux ControlNet Loader**
 
@@ -112,6 +95,14 @@ Whether downloading models from Hugging Face or creating custom exclusive models
 
 The **custom_identifier** in the **Mflux Custom Models** node is not a required field. If you don’t need a specific identifier for differentiation, you can leave it blank.
 
+
+img2img:
+
+![img2img](examples/Air_img2img.png)
+
+I'm still exploring the specific usage myself. If you have any insights worth sharing, feel free to start a discussion in the issues section.
+
+
 ## **Mflux Pro:**
 
 ### Loras:
@@ -124,15 +115,19 @@ Note that when using LORA, you can also use the **Mflux Models Loader** node to 
 
 ### ControlNet:
 
-![ControlNet](examples/Pro_ControlNet.png)
+![ControlNet](examples/Pro_ControlNet_new.png)
 
 Mflux's ControlNet currently only supports Canny.
+
+Ps. To quickly generate sample images this time, I created a custom model using the 4-step LoRA of the dev model.
+
 
 ## **Mflux Plus:**
 
 ![Translate + Mflux](examples/Plus1.png)
 
 A must-have for English beginners.
+
 
 ![Florence2 + Mflux](examples/Plus2.png)
 
