@@ -53,7 +53,7 @@ mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI
 
 **Mflux/Pro**下：
 
-- **Mflux Lode Image**
+- **Mflux Load Image**
 - **Mflux Loras Loader**
 - **Mflux ControlNet Loader**
 

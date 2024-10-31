@@ -52,7 +52,7 @@ Under **Mflux/Air**:
 
 Under **Mflux/Pro**:
 
-- **Mflux Lode Image**
+- **Mflux Load Image**
 - **Mflux Loras Loader**  
 - **Mflux ControlNet Loader**
 
