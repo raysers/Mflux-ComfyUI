@@ -30,9 +30,14 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ## Update Announcement
 
-**About This Update:**
+### **About This Update:**
+
+Based on the discussion in issues#04, a manual path input option has been added to the **Mflux Models Loader** node.
+
+### Review of the last update:
 
 1.Image-to-image
+
 2.Refactor ControlNet workflow
 
 mflux has been updated to version 0.4.1. To experience image-to-image generation, please upgrade in ComfyUI with:
@@ -59,70 +64,127 @@ Under **Mflux/Pro**:
 
 Or double-click in the blank area of the canvas to bring up the node search box, and directly search for the node names by the keyword “Mflux.”
 
-### Process
 
-**Mflux Air:**
+### Basic Path Explanation
+
+#### Quantized Models:
+
+**ComfyUI/models/Mflux**
+
+#### LoRA:
+
+**ComfyUI/models/loras**
+
+I usually create an **Mflux** folder under **models/loras** to manage the LoRAs compatible with Mflux, storing them uniformly. Therefore, in my example, the retrieved files should be Mflux/*******.safetensors.
+
+#### Native Full Models & ControlNet:
+
+**Yourusername/.cache**
+
+Although the current node **Mflux Models Downloader** can automatically download, I would still like to share a few links to quantized models as a token of appreciation:
+
+- [madroid/flux.1-schnell-mflux-4bit](https://huggingface.co/madroid/flux.1-schnell-mflux-4bit)
+- [madroid/flux.1-dev-mflux-4bit](https://huggingface.co/madroid/flux.1-dev-mflux-4bit)
+- [AITRADER/MFLUX.1-schnell-8-bit](https://huggingface.co/AITRADER/MFLUX.1-schnell-8-bit)
+- [AITRADER/MFLUX.1-dev-8-bit](https://huggingface.co/AITRADER/MFLUX.1-dev-8-bit)
+
+Of course, there are also the most important native full models from Black Forest:
+
+- [black-forest-labs/FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell)
+- [black-forest-labs/FLUX.1-dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)
+
+Additionally, here is the FLUX.1-dev-Controlnet-Canny model from the InstantX team:
+
+- [InstantX/FLUX.1-dev-Controlnet-Canny](https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Canny)
+
+
+## Workflow
+
+### **Mflux Air:**
+
+#### text2img:
 
 ![text2img](examples/Air.png)
 
-This process will download the full version of dev or schnell to `.cache` from Huggingface.
+This basic workflow will download the full versions of dev or schnell to `.cache` from Hugging Face, both of which are over 33GB and may put a strain on hard drive space.
 
-Alternatively, the external node can be used to continue loading the quantized models, such as:
+I personally have installed the entire ComfyUI directly on an external hard drive, and I also set the HF_HOME variable to move the `.cache` directory to the external hard drive to avoid running out of disk space.
 
-![text2img](examples/Air_Local_models.png)
 
-Alternatively, you can directly connect to the **Mflux Models Downloader** node to download 4-bit models from Hugging Face, for example:
+Of course, using quantized models will greatly save hard drive space. If you want to use quantized models, you can directly connect to the **Mflux Models Downloader** node to download quantized models from Hugging Face, such as:
 
 ![text2img](examples/Air_Downloaded_models.png)
 
-Alternatively, you can create your exclusive model using the full version of the Black Forest model through **Mflux Custom Models**:
+
+Alternatively, you can use the full version of the Black Forest model that is pre-existing in `.cache` to create your custom model through **Mflux Custom Models**:
 
 For instance, the default quantized version, which is the same as the basic quantized model downloaded from Hugging Face:
 
 ![text2img](examples/Air_Custom_models_default.png)
 
-Or the LORA overlay version, which allows you to apply LORA before quantization, making the model a unique version:
+Or the LoRA stacked version, which allows for quantization after stacking LoRAs, thereby creating a unique model:
 
 ![text2img](examples/Air_Custom_models_loras.png)
 
-The downside of this LORA customized model is that it fundamentally remains a quantized model. If you want to continue stacking LORAs in **Quick MFlux Generation**, it will throw an error.
+The drawback of this LoRA custom model is that it essentially remains a quantized model. If you try to stack LoRAs again in **Quick MFlux Generation**, it will result in an error.
 
-However, if you wish to quickly generate multiple images of the same LORA style and your machine configuration isn’t very high, like my 16GB, then using this method can serve as a compromise for implementing LORA. Once the raw images are completed, you can directly delete this unique model.
+Here, we can extract a mutual exclusion rule: LoRAs and quantized models cannot be used simultaneously; you can only choose one. To achieve the best of both worlds, you can only generate a LoRA custom model through this pre-quantization stacking.
 
-**Note**
+However, if you want to quickly generate multiple images in the same LoRA style and your machine configuration is not very high (for example, mine has 16GB), using this method can serve as a compromise for achieving LoRA results. You can delete this unique model once the generation is complete.
 
-Whether downloading models from Hugging Face or creating custom exclusive models, they only need to be run once. As long as you save the model, you can use the **Mflux Models Loader** node to retrieve them.
-
-The **custom_identifier** in the **Mflux Custom Models** node is not a required field. If you don’t need a specific identifier for differentiation, you can leave it blank.
+Note that the `custom_identifier` in the **Mflux Custom Models** node is not a mandatory field. If you do not need a specific identifier for distinction, you can leave it empty.
 
 
-img2img:
+Whether you are downloading models from Hugging Face or creating custom models, they only need to be **run once**. As long as you save the model, you can use the **Mflux Models Loader** node to retrieve them, such as:
+
+![text2img](examples/Air_Local_models.png)
+
+
+This update also adds the option to manually input paths. Alternatively, you can clear the **models/Mflux** folder, which will show "NONE" in the selection list, and then you can enter your own model path in `free_path`.
+
+
+#### img2img:
 
 ![img2img](examples/Air_img2img.png)
 
-I'm still exploring the specific usage myself. If you have any insights worth sharing, feel free to start a discussion in the issues section.
+I am still exploring the specific usage methods. If you have experiences worth sharing, please feel free to start a discussion in the issues.
 
 
-## **Mflux Pro:**
+### **Mflux Pro:**
 
-### Loras:
+
+#### Loras:
 
 ![Loras](examples/Pro_Loras.png)
 
-The image uses two **Mflux Loras Loader** nodes just to illustrate that they can be chained together, meaning you can theoretically load countless Loras...
+In the image, two **Mflux Loras Loader** nodes are used just to illustrate that they can be chained together, meaning you can theoretically load countless LoRAs...
 
-Note that when using LORA, you can also use the **Mflux Models Loader** node to load local models, but it is limited to full version models. If you select a quantized model from the model list, it will throw an error.
+Please note that you cannot use the **Mflux Models Loader** node to load quantized models when using LoRAs; doing so will result in an error. This further verifies the mutual exclusion rule mentioned above.
 
-### ControlNet:
+Perhaps one day the official team will resolve this error; let's wait patiently.
+
+Note:
+
+Not all LoRAs are compatible with Mflux. Please check the official homepage for specific compatible types:
+
+https://github.com/filipstrand/mflux
+
+Therefore, I typically create an **Mflux** folder under **models/loras** to store all LoRAs compatible with Mflux in one place.
+
+
+#### ControlNet:
 
 ![ControlNet](examples/Pro_ControlNet_new.png)
 
 Mflux's ControlNet currently only supports Canny.
 
-Ps. To quickly generate sample images this time, I created a custom model using the 4-step LoRA of the dev model.
+P.S. To quickly generate example images, I created a custom model using a 4-step LoRA from the dev model.
+
+The advantage of this 4-step LoRA model is that it still belongs to the DEV model, so the Guidance parameter can be effective, and it can produce images in just four steps while retaining the advantages of schnell.
 
 
-## **Mflux Plus:**
+
+### **Mflux Plus:**
 
 ![Translate + Mflux](examples/Plus1.png)
 
@@ -144,11 +206,11 @@ Thus, in this update, metadata is set to true by default, and it can be turned o
 
 ### **Possible Explorations**
 
-## **Mflux MAX:**
+#### **Mflux MAX:**
 
 ......
 
-## **Mflux Ultra:**
+#### **Mflux Ultra:**
 
 ......
 

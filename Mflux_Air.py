@@ -121,7 +121,10 @@ class MfluxModelsLoader:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "model_name": (cls.get_sorted_model_paths(),)
+                "model_name": (cls.get_sorted_model_paths() or ["None"], {"default": cls.get_sorted_model_paths()[0] if cls.get_sorted_model_paths() else "None"}),  
+            },
+            "optional": {
+                "free_path": ("STRING", {"default": "", "tooltip": "Free model path. If provided, this will override the model_name."}),
             }
         }
 
@@ -135,8 +138,16 @@ class MfluxModelsLoader:
         model_paths = [p.name for p in Path(mflux_dir).iterdir() if p.is_dir()]
         return sorted(model_paths, key=lambda x: x.lower())
 
-    def load(self, model_name):
-        full_model_path = get_full_model_path(mflux_dir, model_name)
+    def load(self, model_name="", free_path=""):
+        if free_path:
+            full_model_path = free_path
+            if not os.path.exists(full_model_path):
+                raise ValueError(f"Provided custom path does not exist: {full_model_path}")
+        elif model_name and model_name != "None":  
+            full_model_path = get_full_model_path(mflux_dir, model_name)
+        else:
+            raise ValueError("Either 'model_name' must be provided or 'free_path' must be used.")
+
         return (full_model_path,)
 
 class QuickMfluxNode:
