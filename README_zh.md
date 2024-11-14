@@ -95,7 +95,7 @@ LoRA：
 以及来自InstantX团队的FLUX.1-dev-Controlnet-Canny模型：
 
 - [InstantX/FLUX.1-dev-Controlnet-Canny](https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Canny)
-InstantX/FLUX.1-dev-Controlnet-Canny
+
 
 ## 流程
 
@@ -227,6 +227,10 @@ Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一
 上次更新已完成Img2Img。此外mfux0.4.x还有键盘中断功能，本次更新也已使用ComfyUI的取消按钮来实现。
 
 下一步规划是尽量完成其他功能的实现。
+
+无事请多关注官网：
+
+[https://github.com/filipstrand/mflux](https://github.com/filipstrand/mflux)
 
 ## 贡献
 

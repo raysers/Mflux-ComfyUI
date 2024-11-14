@@ -224,9 +224,9 @@ The previous update has completed Img2Img. In addition, Mflux 0.4.x also include
 
 The next step is to complete the implementation of the remaining features as much as possible.
 
-[https://github.com/filipstrand/mflux](https://github.com/filipstrand/mflux)
+Please pay attention to the official website：
 
-While completing these tasks for Mflux 0.3.0, I awarded myself a star. Even beginner projects need encouragement.
+[https://github.com/filipstrand/mflux](https://github.com/filipstrand/mflux)
 
 ## **Contribution**
 
