@@ -32,13 +32,13 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ### **About This Update:**
 
-Based on the discussion in issues#04, a manual path input option has been added to the **Mflux Models Loader** node.
+1.Add a progress bar and implement interrupting the image generation process at any point; simply click the built-in cancel button (X) in ComfyUI.
+
+2.Temporarily remove the Metadata section in preparation for the next phase of refactoring.
+
+**Note: Although the Metadata switch still exists in the node, it is no longer functional. The workflow must end with the "Save Image" node.**
 
 ### Review of the last update:
-
-1.Image-to-image
-
-2.Refactor ControlNet workflow
 
 mflux has been updated to version 0.4.1. To experience image-to-image generation, please upgrade in ComfyUI with:
 
@@ -48,18 +48,18 @@ mflux has been updated to version 0.4.1. To experience image-to-image generation
 
 Right-click to create nodes:
 
-Under **Mflux/Air**:
+Under **MFlux/Air**:
 
 - **Quick MFlux Generation**  
-- **Mflux Models Loader**
-- **Mflux Models Downloader**
-- **Mflux Custom Models**
+- **MFlux Models Loader**
+- **MFlux Models Downloader**
+- **MFlux Custom Models**
 
-Under **Mflux/Pro**:
+Under **MFlux/Pro**:
 
-- **Mflux Load Image**
-- **Mflux Loras Loader**  
-- **Mflux ControlNet Loader**
+- **MFlux Load Image**
+- **MFlux Loras Loader**  
+- **MFlux ControlNet Loader**
 
 
 Or double-click in the blank area of the canvas to bring up the node search box, and directly search for the node names by the keyword “Mflux.”
@@ -67,17 +67,17 @@ Or double-click in the blank area of the canvas to bring up the node search box,
 
 ### Basic Path Explanation
 
-#### Quantized Models:
+Quantized Models:
 
 **ComfyUI/models/Mflux**
 
-#### LoRA:
+LoRA:
 
 **ComfyUI/models/loras**
 
 I usually create an **Mflux** folder under **models/loras** to manage the LoRAs compatible with Mflux, storing them uniformly. Therefore, in my example, the retrieved files should be Mflux/*******.safetensors.
 
-#### Native Full Models & ControlNet:
+Native Full Models & ControlNet:
 
 **Yourusername/.cache**
 
@@ -200,10 +200,6 @@ All these processes can be dragged directly into ComfyUI from the workflows fold
 !!! If nodes are highlighted in red, use ComfyUI-Manager's "One-click Install Missing Nodes."
 !!! Please note that all processes at the end use preview nodes, which do not automatically save. You need to manually save the generated images you are satisfied with or simply replace the preview nodes with save nodes.
 
-In the **Quick MFlux Generation** node, if the metadata option is set to true (default is false), the generated images will be saved to **ComfyUI/output/Mflux**, along with a JSON file with the same name as the image, which contains almost all the generation parameters for that image.
-I personally prefer to keep metadata set to true and connect to the preview node instead of the save node. The advantage of this approach is that it avoids duplicate saves, and if you need to retrieve information about a certain image in the future, you can check directly in the JSON file, making it easy to replicate the image.
-Thus, in this update, metadata is set to true by default, and it can be turned off with just one click.
-
 ### **Possible Explorations**
 
 #### **Mflux MAX:**
@@ -218,7 +214,15 @@ Here, I hope everyone shares their workflows more, fully promoting the spirit of
 
 ## **Planning**
 
-The complete functionality of Mflux 0.3.0 has been accomplished. Please keep an eye on the official website for updates:
+Official Website Overview of Mflux 0.4.x Features:
+
+- Img2Img Support: Introduced the ability to generate images based on an initial reference image.
+- Image Generation from Metadata: Added support to generate images directly from provided metadata files.
+- Progressive Step Output: Optionally output each step of the image generation process, allowing for real-time monitoring.
+
+The previous update has completed Img2Img. In addition, Mflux 0.4.x also includes a keyboard interrupt feature, and this update has implemented it using ComfyUI's cancel button.
+
+The next step is to complete the implementation of the remaining features as much as possible.
 
 [https://github.com/filipstrand/mflux](https://github.com/filipstrand/mflux)
 
@@ -226,11 +230,7 @@ While completing these tasks for Mflux 0.3.0, I awarded myself a star. Even begi
 
 ## **Contribution**
 
-I am a novice coder, and this is my first GitHub project. My original plan was quite ambitious, such as implementing Lora and ControlNet functionalities for Mflux (currently, only Mflux ControlNet supports Canny and Lora), as well as realizing the essence of ComfyUI—splitting nodes to allow users to understand the underlying logic of flux deeply... However, my limited coding ability restricts my blueprint. I would be very grateful if experts could help realize these goals. Greetings here.
-
-Other contributions should include issue feedback, as I was surprised to find that this project has had zero feedback up to now, and I occasionally overlook problems. For example, I previously lost the “}” symbol and encountered an error where the models/Mflux directory was not automatically created. Additionally, I found a feedback on the ComfyUI official website indicating that OS15 might not be usable.
-
-The resolution for the missing “}” symbol was thanks to @eLenoAr’s timely reminder. Although it wasn’t through the issues channel, I also appreciate @eLenoAr's feedback in the code comments.
+Interactive communication is all a contribution.
 
 ## License
 

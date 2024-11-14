@@ -33,13 +33,13 @@ https://github.com/filipstrand/mflux
 
 ### **关于本次更新：**
 
-根据issues#04的讨论，在**Mflux Models Loader**节点中加入手动输入路径的选择。
+1.添加ComfyUI进度条并实现任意中断生图进程，点按ComfyUI自带的叉号（取消按钮）即可。
+
+2.暂时去掉Metadata部分，为下一步重构做准备。
+
+**注意：虽然节点中仍然有Metadata开关，但已经不起作用，工作流最后必须换成“保存图像”节点。**
 
 ### **上次更新回顾：**
-
-1.图生图
-
-2.重构ControlNet流程
 
 mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI中升级：
 
@@ -49,34 +49,34 @@ mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI
 
 右键新建节点：
 
-**Mflux/Air**下：
+**MFlux/Air**下：
 
 - **Quick MFlux Generation**
-- **Mflux Models Loader**
-- **Mflux Models Downloader**
-- **Mflux Custom Models**
+- **MFlux Models Loader**
+- **MFlux Models Downloader**
+- **MFlux Custom Models**
 
-**Mflux/Pro**下：
+**MFlux/Pro**下：
 
-- **Mflux Load Image**
-- **Mflux Loras Loader**
-- **Mflux ControlNet Loader**
+- **MFlux Load Image**
+- **MFlux Loras Loader**
+- **MFlux ControlNet Loader**
 
 或者双击画板空白处调出节点搜索框，直接搜索节点名称，搜索关键字“Mflux”
 
 ### **基础路径说明**
 
-#### 量化模型：
+量化模型：
 
 **ComfyUI/models/Mflux**
 
-#### LoRA：
+LoRA：
 
 **ComfyUI/models/loras**
 
 我的习惯是在**models/loras**下新建Mflux文件夹，用来检测Mflux所能适配的LORA，统一存放其中，因此在我的示例中，检索出来的应该是Mflux/*******.safetensors
 
-#### 原生完整模型&ControlNet：
+原生完整模型&ControlNet：
 
 **你的用户名/.cache**
 
@@ -127,7 +127,7 @@ InstantX/FLUX.1-dev-Controlnet-Canny
 
 这种LORA定制模型的不足是它本质仍然属于量化模型，你想在**Quick MFlux Generation**里继续叠加Loras的话，它就会报错。
 
-在这里我们可以提取到一个互斥规则：即LORA与量化模型不能同时使用，只能二选一；要想实现鱼和熊掌的兼得，只能通过这种量化前的叠加来生成LORA定制模型。
+在这里我们可以提取到一个互斥规则：**即LORA与量化模型不能同时使用，只能二选一；**要想实现鱼和熊掌的兼得，只能通过这种量化前的叠加来生成LORA定制模型。
 
 但是，如果你想要快速生成同一种lora风格的多张图片，并且您的机器配置不是很高，比如我的16GB，那么使用这种方法可以当做实现Lora的折中方案，生图完成的时候可以直接删除这种独特模型。
 
@@ -179,7 +179,7 @@ Mflux的ControlNet，目前仅支持Canny
 
 Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一个专属模型。
 
-这个4步LoRA模型的有点是它仍然属于DEV模型，因此Guidance参数可以对它生效，而且仅需四步就能出图，又兼具schnell的优点。
+这个4步LoRA模型的优点是它仍然属于DEV模型，因此Guidance参数可以对它生效，而且仅需四步就能出图，又兼具schnell的优点。
 
 
 ### **Mflux Plus：**
@@ -202,10 +202,6 @@ Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一
 
 ！！！请注意流程末端全部使用的是预览节点，不会自动保存，需要自己挑选满意的生成图片手动保存，或者干脆把预览节点换成保存节点。
 
- **Quick MFlux Generation** 节点中的metadata选项，如果它是true值（默认false），那么生成的图像将被保存到 **ComfyUI/output/Mflux** 中，同时带有图像同名的json文件，里面包含了该图像的几乎一切生成参数。
- 我个人比较喜欢打开metadata为true，同时连接预览节点而不是保存节点，这样的好处是不会重复保存，而且如果日后要检索某图片的信息，可以直接json文件中查阅，方便复刻图像。
- 因此这次更新中，metadata被我默认打开，如果需要关闭，只需一个点击。
-
 ### 可能的探索
 
 #### **Mflux MAX:**
@@ -220,19 +216,21 @@ Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一
 
 ## 规划
 
-目前已完成了Mflux0.3.0的全部功能。请留意官网的更新：
+官网介绍的mfux0.4.x的功能：
 
-https://github.com/filipstrand/mflux
+- Img2Img支持：引入了基于初始参考图像生成图像的功能。
 
-完成Mflux0.3.0的这些工作时，我给了自己一颗星。新手项目同样需要勉励。
+- 从Metadata生成图像：增加了直接从提供的Metadata生成图像的支持。
+
+- 渐进步输出：可选择输出图像生成过程的每个步骤，允许实时监控。
+
+上次更新已完成Img2Img。此外mfux0.4.x还有键盘中断功能，本次更新也已使用ComfyUI的取消按钮来实现。
+
+下一步规划是尽量完成其他功能的实现。
 
 ## 贡献
 
-我是编码新手，这是我的第一个GitHub项目。我原本的规划十分宏大，比如实现mflux的Lora以及ControlNet功能（目前已实现Mflux ControNet仅Canny，还有Lora），以及实现ComfyUI的精髓理念——即拆分节点以让用户能够深入了解flux的底层逻辑……但我粗浅的代码能力限制了我的蓝图。如果有高手能够帮忙实现这些，我十分感谢。在此问好。
-
-其他的贡献应当包括问题反馈，因为我惊奇地发觉这个项目居然到目前为止都是0反馈，而我有时难免疏漏，无法发现问题。比如之前曾经丢失过“}”符号，并且出现过models/Mflux目录没被自动创建的错误。此外我在ComfyUI官网上发现了一个反馈，即OS15可能不能使用。
-
-“}”符号的解决是@eLenoAr及时提醒了我，虽然不是通过issues渠道，但同样感谢@eLenoAr在代码下的留言反馈。
+互动交流即是贡献。
 
 ## 许可证
 我想采用和mflux项目一致的MIT麻省理工许可，也算为开源贡献一份心力吧。
