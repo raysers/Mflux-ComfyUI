@@ -110,16 +110,6 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
         controlnet_cond = ArrayUtil.pack_latents(latents=controlnet_cond, height=config.height, width=config.width)
 
         latents = LatentCreator.create(seed=seed, height=config.height, width=config.width)
-
-        t = 0
-        controlnet_block_samples, controlnet_single_block_samples = flux.transformer_controlnet.forward(
-            t=t,
-            prompt_embeds=prompt_embeds,
-            pooled_prompt_embeds=pooled_prompt_embeds,
-            hidden_states=latents,
-            controlnet_cond=controlnet_cond,
-            config=config,
-        )
     else:
         latents = LatentCreator.create_for_txt2img_or_img2img(seed, config, flux.vae)
 
