@@ -4,8 +4,6 @@ import os
 import numpy as np
 import torch
 from tqdm import tqdm
-from PIL import Image
-from PIL.PngImagePlugin import PngInfo
 import comfy.utils as utils
 import folder_paths
 
@@ -21,7 +19,6 @@ from mflux.latent_creator.latent_creator import LatentCreator
 from mflux.post_processing.stepwise_handler import StepwiseHandler
 from mflux.controlnet.controlnet_util import ControlnetUtil
 from mflux.models.vae.vae import VAE
-import folder_paths
 from .Mflux_Pro import MfluxControlNetPipeline
 
 flux_cache = {}

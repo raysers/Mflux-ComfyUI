@@ -4,7 +4,7 @@ from huggingface_hub import snapshot_download
 from folder_paths import models_dir 
 from mflux.config.model_config import ModelConfig
 from mflux.flux.flux import Flux1
-from .Mflux_Core import generate_image
+from .Mflux_Core import get_lora_info, generate_image
 
 def create_directory(directory):
     if not os.path.exists(directory):
