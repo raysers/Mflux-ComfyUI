@@ -33,13 +33,47 @@ https://github.com/filipstrand/mflux
 
 ### **关于本次更新：**
 
-1.添加ComfyUI进度条并实现任意中断生图进程，点按ComfyUI自带的叉号（取消按钮）即可。
+- 将失踪的metadata带回来。
 
-2.暂时去掉Metadata部分，为下一步重构做准备。
+**Quick MFlux Generation**节点中的metadata默认为True，这将使生成图像被自动保存到**ComfyUI/output/Mflux**下，同时带有与图像同名的JSON文件。
 
-**注意：虽然节点中仍然有Metadata开关，但已经不起作用，工作流最后必须换成“保存图像”节点。**
+一些解释：
 
-### **上次更新回顾：**
+问：为何如此大费周章地添加大批代码来引入这个功能，是否不值得？
+
+答：**此功能是为了实现与mflux官方原版的互通。ComfyUI所保存的JSON文件同样可以直接用于mflux官方原版复刻图像。**
+
+问：既然有了ComfyUI的便捷操作，为何还要使用官方原版？
+
+答：这是因为作者我并不专业。目前的ComfyUI版可能存在许多不足，比如内存消耗巨大的问题，我的16G内存在使用ComfyUI时总是保持在13~14G的内存消耗，而mflux官方原版的内存回收机制十分优越，我本人测试在原版mflux下生图完成后内存总能自动释放，维持在很低的值。而且过去终端操作不便捷的问题已经得到巨大改善，因为mflux0.4.X引入了 **--config-from-metadata**指令，极大简化了生图所需要输入的参数。
+
+问：如何在ComfyUI目录下运行mflux原版并使用--config-from-metadata生图？
+
+答：
+
+1. cd /path/to/your_ComfyUI
+2. 激活虚拟环境
+3. mflux-generate --config-from-metadata /Users/XXXXX/ComfyUI/output/MFlux/Mflux_XXXXX.json
+
+示例：
+
+![Mflux_Metadata](examples/Mflux_Metadata.png)
+
+Ps.为了生成这张示例图，我使用了control+c断掉ComfyUI进程，然后使用mflux-generate --config-from-metadata的方法生成图片。并且你可以直接修改JSON里的参数，得到不同的出图结果。
+
+问：ComfyUI中也可以使用JSON复刻生图吗？
+
+答：ComfyUI有自己一贯的方法，就是拖入图片加载工作流，**ComfyUI/output/Mflux**中所保存的图片都是嵌入了工作流程的，可以直接拖入ComfyUI使用。
+
+——以上就是为何我在保存图像的同时，要如此执着地保存一份JSON：图像可以拖入ComfyUI，JSON可以加载进mflux原版，在我看来这是两全其美的。
+
+### **往期更新回顾：**
+
+- 添加ComfyUI进度条和中断操作功能，点按ComfyUI自带的叉号（取消按钮）即可
+
+- 自由路径
+
+- 图生图
 
 mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI中升级：
 
@@ -224,7 +258,9 @@ Ps.本次为了快速生成示例图，我使用dev模型的4步LoRA创建了一
 
 - 渐进步输出：可选择输出图像生成过程的每个步骤，允许实时监控。
 
-上次更新已完成Img2Img。此外mfux0.4.x还有键盘中断功能，本次更新也已使用ComfyUI的取消按钮来实现。
+往期更新已完成Img2Img。此外mfux0.4.x还有键盘中断功能，上次更新也已使用ComfyUI的取消按钮来实现。
+
+本次更新则完成了从Metadata生成图像的功能。
 
 下一步规划是尽量完成其他功能的实现。
 

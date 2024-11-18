@@ -1,4 +1,3 @@
-# 假设 Mflux_Comfy 文件夹和 __init__.py 位于同一目录下
 from .Mflux_Comfy.Mflux_Air import QuickMfluxNode, MfluxModelsLoader, MfluxModelsDownloader, MfluxCustomModels
 from .Mflux_Comfy.Mflux_Pro import MfluxLoadImage, MfluxLorasLoader, MfluxControlNetLoader  # 仅导入所需的非实验节点
 

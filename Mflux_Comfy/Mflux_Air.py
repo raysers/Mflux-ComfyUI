@@ -1,10 +1,11 @@
 import os
+import json
 from pathlib import Path 
 from huggingface_hub import snapshot_download
-from folder_paths import models_dir 
+from folder_paths import get_filename_list, get_output_directory, models_dir
 from mflux.config.model_config import ModelConfig
 from mflux.flux.flux import Flux1
-from .Mflux_Core import get_lora_info, generate_image
+from .Mflux_Core import get_lora_info, generate_image, save_images_with_metadata
 
 def create_directory(directory):
     if not os.path.exists(directory):
@@ -139,6 +140,10 @@ class QuickMfluxNode:
                 "image": ("MfluxImagePipeline",),
                 "Loras": ("MfluxLorasPipeline",),
                 "ControlNet": ("MfluxControlNetPipeline",),
+            },
+            "hidden": {
+                "full_prompt": "PROMPT", 
+                "extra_pnginfo": "EXTRA_PNGINFO"
             }
         }
 
@@ -146,6 +151,37 @@ class QuickMfluxNode:
     CATEGORY = "MFlux/Air"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None):
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None, full_prompt=None, extra_pnginfo=None):
+        generated_images = generate_image(
+            prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, image, Loras, ControlNet
+        )
 
-        return generate_image(prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, image, Loras, ControlNet)
+        image_path = image.image_path if image else None
+        strength = image.strength if image else None
+        lora_paths, lora_scales = get_lora_info(Loras)
+
+        if metadata:
+            save_images_params = {
+                "images": generated_images,
+                "prompt": prompt,
+                "model": "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model,
+                "quantize": quantize,
+                "Local_model": Local_model,
+                "seed": seed,
+                "height": height,
+                "width": width,
+                "steps": steps,
+                "guidance": guidance,
+                "image_path": image_path,
+                "strength": strength,
+                "lora_paths": lora_paths,
+                "lora_scales": lora_scales,
+                "filename_prefix": "Mflux",
+                "full_prompt": full_prompt,
+                "extra_pnginfo": extra_pnginfo,
+            }
+
+            result = save_images_with_metadata(**save_images_params)
+            counter = result["counter"]
+
+        return generated_images

@@ -32,13 +32,48 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ### **About This Update:**
 
-1.Add a progress bar and implement interrupting the image generation process at any point; simply click the built-in cancel button (X) in ComfyUI.
+- Bring Back the Missing Metadata
 
-2.Temporarily remove the Metadata section in preparation for the next phase of refactoring.
+The **Quick MFlux Generation** node has its `metadata` option set to `True` by default. This ensures that generated images are automatically saved to **ComfyUI/output/Mflux**, along with a JSON file named identically to the image.
 
-**Note: Although the Metadata switch still exists in the node, it is no longer functional. The workflow must end with the "Save Image" node.**
+Some Explanations:
 
-### Review of the last update:
+Q: Why go to such lengths to add so much code for this feature? Is it worth it?  
+A: **This feature ensures compatibility with the official version of MFlux. The JSON files saved by ComfyUI can also be directly used to recreate images in the official MFlux version.**
+
+Q: If ComfyUI is already convenient, why use the official version? 
+A: Because I’m not a professional developer. The current ComfyUI version might have several limitations, such as high memory usage. For example, my 16GB RAM consistently shows 13–14GB usage when running ComfyUI. On the other hand, the official MFlux version has an excellent memory recycling mechanism. In my tests, after image generation, the official version consistently frees up memory and maintains a low usage level. Moreover, previous issues with terminal-based operations have been significantly improved, thanks to the introduction of the **--config-from-metadata** command in MFlux 0.4.X. This greatly simplifies the parameters needed for image generation.
+
+Q: How can I use the official MFlux version within the ComfyUI directory and generate images with `--config-from-metadata`? 
+A:
+Follow these steps:
+1. `cd /path/to/your_ComfyUI`
+2. Activate the virtual environment.
+3. Run:  
+   `mflux-generate --config-from-metadata /Users/XXXXX/ComfyUI/output/MFlux/Mflux_XXXXX.json`
+
+**Example:**  
+![Mflux_Metadata](examples/Mflux_Metadata.png)
+
+*P.S.: To generate the above example image, I terminated the ComfyUI process using `control+c`, then used the `mflux-generate --config-from-metadata` method. You can directly modify the JSON parameters to obtain different image outputs.*
+
+Q: Can JSON-based recreation also work within ComfyUI?**  
+A: Yes, ComfyUI has its own method. Simply drag and drop the saved image into the workflow. Images saved in **ComfyUI/output/Mflux** embed the workflow directly, so they can be used in ComfyUI without additional steps.
+
+---
+
+- Images can be directly dragged into ComfyUI for reuse.  
+- JSON files can be loaded into the official mflux version.  
+
+In my view, this approach combines the best of both worlds.
+
+---
+
+### **Previous Updates Recap:**
+
+- Added progress bar and interruption functionality in ComfyUI. Click the built-in cancel button (the cross icon) to interrupt.  
+- Customizable file paths.  
+- Image-to-Image generation.
 
 mflux has been updated to version 0.4.1. To experience image-to-image generation, please upgrade in ComfyUI with:
 
@@ -220,7 +255,9 @@ Official Website Overview of Mflux 0.4.x Features:
 - Image Generation from Metadata: Added support to generate images directly from provided metadata files.
 - Progressive Step Output: Optionally output each step of the image generation process, allowing for real-time monitoring.
 
-The previous update has completed Img2Img. In addition, Mflux 0.4.x also includes a keyboard interrupt feature, and this update has implemented it using ComfyUI's cancel button.
+Previous updates have already completed the Img2Img functionality. Additionally, MFlux 0.4.x introduced a keyboard interruption feature, which was implemented in the last update using ComfyUI's cancel button.
+
+This update focuses on completing the functionality to generate images from metadata.
 
 The next step is to complete the implementation of the remaining features as much as possible.
 

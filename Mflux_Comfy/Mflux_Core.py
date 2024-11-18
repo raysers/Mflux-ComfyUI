@@ -4,6 +4,8 @@ import os
 import numpy as np
 import torch
 from tqdm import tqdm
+from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 import comfy.utils as utils
 import folder_paths
 
@@ -15,6 +17,7 @@ from mflux.controlnet.flux_controlnet import Flux1Controlnet
 from mflux.config.runtime_config import RuntimeConfig
 from mflux.post_processing.array_util import ArrayUtil
 from mflux.post_processing.image_util import ImageUtil
+from mflux.post_processing.generated_image import GeneratedImage
 from mflux.latent_creator.latent_creator import LatentCreator
 from mflux.post_processing.stepwise_handler import StepwiseHandler
 from mflux.controlnet.controlnet_util import ControlnetUtil
@@ -46,6 +49,7 @@ def get_lora_info(Loras):
 
 def generate_image(prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None):
     model = "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model
+    print(f"Using model: {model}")
     image_path = image.image_path if image else None
     strength = image.strength if image else None
 
@@ -161,3 +165,59 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
         tensor_image = tensor_image.unsqueeze(0)
 
     return (tensor_image,)
+
+def save_images_with_metadata(images, prompt, model, quantize, Local_model, seed, height, width, steps, guidance, lora_paths, lora_scales, image_path, strength, filename_prefix="Mflux", full_prompt=None, extra_pnginfo=None):
+    
+    output_dir = folder_paths.get_output_directory()
+    full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
+        filename_prefix, output_dir, images[0].shape[1], images[0].shape[0])
+    mflux_output_folder = os.path.join(full_output_folder, "MFlux")
+    os.makedirs(mflux_output_folder, exist_ok=True)
+    existing_files = os.listdir(mflux_output_folder)
+    existing_counters = [
+        int(f.split("_")[-1].split(".")[0])
+        for f in existing_files
+        if f.startswith(filename_prefix) and f.endswith(".png")
+    ]
+    counter = max(existing_counters, default=0) + 1
+
+    results = list()
+    for image in images:
+        i = 255. * image.cpu().numpy().squeeze()
+        img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+        metadata = None
+        if full_prompt is not None or extra_pnginfo is not None:
+            metadata = PngInfo()
+            if full_prompt is not None:
+                metadata.add_text("full_prompt", json.dumps(full_prompt))
+            if extra_pnginfo is not None:
+                for x in extra_pnginfo:
+                    metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+        image_file = f"{filename_prefix}_{counter:05}.png"
+        img.save(os.path.join(mflux_output_folder, image_file), pnginfo=metadata, compress_level=4)
+        results.append({
+            "filename": image_file,
+            "subfolder": subfolder,
+            "type": "output"
+        })
+
+        metadata_jsonfile = os.path.join(mflux_output_folder, f"{filename_prefix}_{counter:05}.json")
+        json_dict = {
+            "prompt": prompt,
+            "model": model,
+            "quantize": quantize,
+            "seed": seed,
+            "height": height,
+            "width": width,
+            "steps": steps,
+            "guidance": guidance if model == "dev" else None,
+            "Local_model": Local_model,
+            "init_image_path": image_path,
+            "init_image_strength": strength,
+            "lora_paths": lora_paths,
+            "lora_scales": lora_scales,
+        }
+        with open(metadata_jsonfile, 'w') as metadata_file:
+            json.dump(json_dict, metadata_file, indent=4)
+        counter += 1
+    return {"ui": {"images": results}, "counter": counter}
