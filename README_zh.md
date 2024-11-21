@@ -33,41 +33,31 @@ https://github.com/filipstrand/mflux
 
 ### **关于本次更新：**
 
-- 将失踪的metadata带回来。
+- 无功能更新。仅仅是删除README中的一些不合适的推荐信息并作一些提醒。
+
+在先前的README中，我曾推荐过我个人的用法，将ComfyUI和.cache全部放在移动硬盘中，但随着使用频率增加，移动硬盘似乎老化并出现问题，导致运行时报错超时，具体问题与以下链接里的问题如出一辙：
+
+https://github.com/ml-explore/mlx/issues/1438
+
+并且在启动ComfyUI进行第一次生图时，加载模型变得异常迟缓，虽然这是我个人的移动硬盘的问题，但我不得不提醒这个潜在的风险。
+
+**目前我已将ComfyUI和.cache移回了内置硬盘中，并且不再推荐将ComfyUI和.cache放在移动硬盘的做法，同时对之前的推荐可能造成的影响表示歉意。**
+
+### **往期更新回顾：**
+
+- 将失踪的metadata带回来
 
 **Quick MFlux Generation**节点中的metadata默认为True，这将使生成图像被自动保存到**ComfyUI/output/Mflux**下，同时带有与图像同名的JSON文件。
 
-一些解释：
-
-问：为何如此大费周章地添加大批代码来引入这个功能，是否不值得？
-
-答：**此功能是为了实现与mflux官方原版的互通。ComfyUI所保存的JSON文件同样可以直接用于mflux官方原版复刻图像。**
-
-问：既然有了ComfyUI的便捷操作，为何还要使用官方原版？
-
-答：这是因为作者我并不专业。目前的ComfyUI版可能存在许多不足，比如内存消耗巨大的问题，我的16G内存在使用ComfyUI时总是保持在13~14G的内存消耗，而mflux官方原版的内存回收机制十分优越，我本人测试在原版mflux下生图完成后内存总能自动释放，维持在很低的值。而且过去终端操作不便捷的问题已经得到巨大改善，因为mflux0.4.X引入了 **--config-from-metadata**指令，极大简化了生图所需要输入的参数。
-
-问：如何在ComfyUI目录下运行mflux原版并使用--config-from-metadata生图？
-
-答：
-
-1. cd /path/to/your_ComfyUI
-2. 激活虚拟环境
-3. mflux-generate --config-from-metadata /Users/XXXXX/ComfyUI/output/MFlux/Mflux_XXXXX.json
+ComfyUI目录中同样可以使用mflux-generate --config-from-metadata的方法加载一份json文件来使用mflux原版完成生图。
 
 示例：
 
 ![Mflux_Metadata](examples/Mflux_Metadata.png)
 
-Ps.为了生成这张示例图，我使用了control+c断掉ComfyUI进程，然后使用mflux-generate --config-from-metadata的方法生成图片。并且你可以直接修改JSON里的参数，得到不同的出图结果。
+原版的优点是内存回收干净利落，每一次生图完成自动释放内存，打开活动监视器就能看见这种差异。
 
-问：ComfyUI中也可以使用JSON复刻生图吗？
-
-答：ComfyUI有自己一贯的方法，就是拖入图片加载工作流，**ComfyUI/output/Mflux**中所保存的图片都是嵌入了工作流程的，可以直接拖入ComfyUI使用。
-
-——以上就是为何我在保存图像的同时，要如此执着地保存一份JSON：图像可以拖入ComfyUI，JSON可以加载进mflux原版，在我看来这是两全其美的。
-
-### **往期更新回顾：**
+如果要体验mflux原版，那么可以多一个选择。
 
 - 添加ComfyUI进度条和中断操作功能，点按ComfyUI自带的叉号（取消按钮）即可
 
@@ -140,9 +130,6 @@ LoRA：
 ![text2img](examples/Air.png)
 
 这个基础流程将会从Huggingface下载完整版的dev或schnell到`.cache`里，它们都有33G多，可能会给硬盘空间带来负担。
-
-我本人是将整个ComfyUI直接安装在移动硬盘里的，同时通过设置HF_HOME变量将`.cache`目录也移动到移动硬盘中，以规避这种硬盘空间吃紧的问题。
-
 
 当然使用量化模型将大大节省硬盘空间，如果您想使用量化模型，可以直接连接**Mflux Models Downloader**节点以从Huggingface下载量化模型，比如：
 

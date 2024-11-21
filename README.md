@@ -32,44 +32,31 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ### **About This Update:**
 
-- Bring Back the Missing Metadata
+- No functional updates. This update only involves removing some inappropriate recommendations from the README and adding a few reminders.
 
-The **Quick MFlux Generation** node has its `metadata` option set to `True` by default. This ensures that generated images are automatically saved to **ComfyUI/output/Mflux**, along with a JSON file named identically to the image.
+In the previous README, I had shared my personal usage method, suggesting placing both ComfyUI and the .cache folder on an external hard drive. However, as usage frequency increased, the external hard drive seemed to age and began encountering issues, leading to timeout errors during operation. These issues were identical to those described in the following link:
 
-Some Explanations:
+https://github.com/ml-explore/mlx/issues/1438
 
-Q: Why go to such lengths to add so much code for this feature? Is it worth it?  
-A: **This feature ensures compatibility with the official version of MFlux. The JSON files saved by ComfyUI can also be directly used to recreate images in the official MFlux version.**
+Additionally, when launching ComfyUI to generate an image for the first time, model loading became unusually slow. Although this issue is due to the aging of my personal external hard drive, I feel it is necessary to highlight this potential risk.
 
-Q: If ComfyUI is already convenient, why use the official version? 
-A: Because I’m not a professional developer. The current ComfyUI version might have several limitations, such as high memory usage. For example, my 16GB RAM consistently shows 13–14GB usage when running ComfyUI. On the other hand, the official MFlux version has an excellent memory recycling mechanism. In my tests, after image generation, the official version consistently frees up memory and maintains a low usage level. Moreover, previous issues with terminal-based operations have been significantly improved, thanks to the introduction of the **--config-from-metadata** command in MFlux 0.4.X. This greatly simplifies the parameters needed for image generation.
-
-Q: How can I use the official MFlux version within the ComfyUI directory and generate images with `--config-from-metadata`? 
-A:
-Follow these steps:
-1. `cd /path/to/your_ComfyUI`
-2. Activate the virtual environment.
-3. Run:  
-   `mflux-generate --config-from-metadata /Users/XXXXX/ComfyUI/output/MFlux/Mflux_XXXXX.json`
-
-**Example:**  
-![Mflux_Metadata](examples/Mflux_Metadata.png)
-
-*P.S.: To generate the above example image, I terminated the ComfyUI process using `control+c`, then used the `mflux-generate --config-from-metadata` method. You can directly modify the JSON parameters to obtain different image outputs.*
-
-Q: Can JSON-based recreation also work within ComfyUI?**  
-A: Yes, ComfyUI has its own method. Simply drag and drop the saved image into the workflow. Images saved in **ComfyUI/output/Mflux** embed the workflow directly, so they can be used in ComfyUI without additional steps.
-
----
-
-- Images can be directly dragged into ComfyUI for reuse.  
-- JSON files can be loaded into the official mflux version.  
-
-In my view, this approach combines the best of both worlds.
-
----
+**I have since moved ComfyUI and the .cache folder back to the internal hard drive and no longer recommend placing them on an external hard drive. I also apologize for any issues caused by my previous recommendation.**
 
 ### **Previous Updates Recap:**
+
+- Bring back the missing metadata
+
+The Quick MFlux Generation node has metadata enabled by default (set to True). This means that the generated images will be automatically saved under ComfyUI/output/Mflux, along with a JSON file that shares the same name as the image.
+
+In the ComfyUI directory, you can also use the mflux-generate --config-from-metadata command to load a JSON file and use the original mflux to generate images.
+
+Example:
+
+![Mflux_Metadata](examples/Mflux_Metadata.png)
+
+The advantage of the original version is its clean memory management: it automatically releases memory after each generation, as can be observed in the Activity Monitor.
+
+If you'd like to experience the original mflux, this provides an additional option.
 
 - Added progress bar and interruption functionality in ComfyUI. Click the built-in cancel button (the cross icon) to interrupt.  
 - Customizable file paths.  
@@ -142,9 +129,6 @@ Additionally, here is the FLUX.1-dev-Controlnet-Canny model from the InstantX te
 ![text2img](examples/Air.png)
 
 This basic workflow will download the full versions of dev or schnell to `.cache` from Hugging Face, both of which are over 33GB and may put a strain on hard drive space.
-
-I personally have installed the entire ComfyUI directly on an external hard drive, and I also set the HF_HOME variable to move the `.cache` directory to the external hard drive to avoid running out of disk space.
-
 
 Of course, using quantized models will greatly save hard drive space. If you want to use quantized models, you can directly connect to the **Mflux Models Downloader** node to download quantized models from Hugging Face, such as:
 
