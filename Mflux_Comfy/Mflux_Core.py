@@ -51,17 +51,19 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
     model = "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model
     print(f"Using model: {model}")
     image_path = image.image_path if image else None
-    strength = image.strength if image else None
+    image_strength = image.image_strength if image else None
 
     lora_paths, lora_scales = get_lora_info(Loras)
     if Loras:
         print(f"LoRA paths: {lora_paths}")
         print(f"LoRA scales: {lora_scales}")
 
-    ControlNet_model_selection, save_canny = None, None
+    ControlNet_model_selection, control_image_path, controlnet_strength, save_canny = None, None, None, None
     if ControlNet and isinstance(ControlNet, MfluxControlNetPipeline):
         ControlNet_model_selection = ControlNet.model_selection
         save_canny = ControlNet.save_canny
+        control_strength = ControlNet.control_strength
+        control_image_path = ControlNet.control_image_path
 
     quantize = None if quantize == "None" else int(quantize)
     seed = random.randint(0, 0xffffffffffffffff) if seed == -1 else int(seed)
@@ -77,9 +79,9 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
             height=height,
             width=width,
             guidance=guidance,
-            **({"controlnet_strength": strength} if ControlNet else {
+            **({"controlnet_strength": control_strength} if ControlNet else {
                 "init_image_path": image_path,
-                "init_image_strength": strength
+                "init_image_strength": image_strength
             })
         ),
         model_config=flux.model_config
@@ -102,7 +104,7 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
     pooled_prompt_embeds = flux.clip_text_encoder.forward(clip_tokens)
 
     if ControlNet:
-        control_image = ImageUtil.load_image(image_path)
+        control_image = ImageUtil.load_image(control_image_path)
         control_image = ControlnetUtil.scale_image(config.height, config.width, control_image)
         control_image = ControlnetUtil.preprocess_canny(control_image)
         controlnet_cond = ImageUtil.to_array(control_image)
