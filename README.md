@@ -32,15 +32,9 @@ Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick
 
 ### **About This Update:**
 
-- No functional updates. This update only involves removing some inappropriate recommendations from the README and adding a few reminders.
+- The ControlNet node integrates images and intensity to distinguish it from img2img — contribution from @InformEthics.
 
-In the previous README, I had shared my personal usage method, suggesting placing both ComfyUI and the .cache folder on an external hard drive. However, as usage frequency increased, the external hard drive seemed to age and began encountering issues, leading to timeout errors during operation. These issues were identical to those described in the following link:
-
-https://github.com/ml-explore/mlx/issues/1438
-
-Additionally, when launching ComfyUI to generate an image for the first time, model loading became unusually slow. Although this issue is due to the aging of my personal external hard drive, I feel it is necessary to highlight this potential risk.
-
-**I have since moved ComfyUI and the .cache folder back to the internal hard drive and no longer recommend placing them on an external hard drive. I also apologize for any issues caused by my previous recommendation.**
+This is the first time other contributors have participated in updating this plugin. Thanks @InformEthics.
 
 ### **Previous Updates Recap:**
 
@@ -79,7 +73,7 @@ Under **MFlux/Air**:
 
 Under **MFlux/Pro**:
 
-- **MFlux Load Image**
+- **Mflux Img2Img**
 - **MFlux Loras Loader**  
 - **MFlux ControlNet Loader**
 
@@ -193,7 +187,7 @@ Therefore, I typically create an **Mflux** folder under **models/loras** to stor
 
 #### ControlNet:
 
-![ControlNet](examples/Pro_ControlNet_new.png)
+![ControlNet](examples/Pro_ControlNet.png)
 
 Mflux's ControlNet currently only supports Canny.
 

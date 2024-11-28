@@ -33,15 +33,9 @@ https://github.com/filipstrand/mflux
 
 ### **关于本次更新：**
 
-- 无功能更新。仅仅是删除README中的一些不合适的推荐信息并作一些提醒。
+- ControlNet节点集成图像与强度，以与img2img作区分————来自@InformEthics的贡献。
 
-在先前的README中，我曾推荐过我个人的用法，将ComfyUI和.cache全部放在移动硬盘中，但随着使用频率增加，移动硬盘似乎老化并出现问题，导致运行时报错超时，具体问题与以下链接里的问题如出一辙：
-
-https://github.com/ml-explore/mlx/issues/1438
-
-并且在启动ComfyUI进行第一次生图时，加载模型变得异常迟缓，虽然这是我个人的移动硬盘的问题，但我不得不提醒这个潜在的风险。
-
-**目前我已将ComfyUI和.cache移回了内置硬盘中，并且不再推荐将ComfyUI和.cache放在移动硬盘的做法，同时对之前的推荐可能造成的影响表示歉意。**
+这是本插件第一次有其他贡献者参与更新，谢谢@InformEthics。
 
 ### **往期更新回顾：**
 
@@ -82,7 +76,7 @@ mflux已经更新到0.4.1版本，如果要体验图生图，那么请在ComfyUI
 
 **MFlux/Pro**下：
 
-- **MFlux Load Image**
+- **Mflux Img2Img**
 - **MFlux Loras Loader**
 - **MFlux ControlNet Loader**
 
@@ -194,7 +188,7 @@ https://github.com/filipstrand/mflux
 
 #### ControlNet:
 
-![ControlNet](examples/Pro_ControlNet_new.png)
+![ControlNet](examples/Pro_ControlNet.png)
 
 Mflux的ControlNet，目前仅支持Canny
 
