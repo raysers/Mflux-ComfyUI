@@ -149,7 +149,7 @@ class MfluxControlNetLoader:
 
         }
 
-    CATEGORY = "MFlux"
+    CATEGORY = "MFlux/Pro"
     RETURN_TYPES = ("MfluxControlNetPipeline", "INT", "INT", "IMAGE",)
     RETURN_NAMES = ("ControlNet", "width", "height", "preprocessed_image")
     FUNCTION = "load_and_select"
