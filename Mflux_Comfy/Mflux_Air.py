@@ -137,8 +137,8 @@ class QuickMfluxNode:
             },
             "optional": {
                 "Local_model": ("PATH",),
-                "img2img": ("MfluxImg2ImgPipeline",),
                 "Loras": ("MfluxLorasPipeline",),
+                "img2img": ("MfluxImg2ImgPipeline",),              
                 "ControlNet": ("MfluxControlNetPipeline",),
             },
             "hidden": {
