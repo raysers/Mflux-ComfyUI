@@ -137,7 +137,7 @@ class QuickMfluxNode:
             },
             "optional": {
                 "Local_model": ("PATH",),
-                "image": ("MfluxImagePipeline",),
+                "img2img": ("MfluxImg2ImgPipeline",),
                 "Loras": ("MfluxLorasPipeline",),
                 "ControlNet": ("MfluxControlNetPipeline",),
             },
@@ -151,13 +151,13 @@ class QuickMfluxNode:
     CATEGORY = "MFlux/Air"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None, full_prompt=None, extra_pnginfo=None):
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", img2img=None, Loras=None, ControlNet=None, full_prompt=None, extra_pnginfo=None):
         generated_images = generate_image(
-            prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, image, Loras, ControlNet
+            prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, img2img, Loras, ControlNet
         )
 
-        image_path = image.image_path if image else None
-        strength = image.strength if image else None
+        image_path = img2img.image_path if img2img else None
+        image_strength = img2img.image_strength if img2img else None
         lora_paths, lora_scales = get_lora_info(Loras)
 
         if metadata:
@@ -173,7 +173,7 @@ class QuickMfluxNode:
                 "steps": steps,
                 "guidance": guidance,
                 "image_path": image_path,
-                "strength": strength,
+                "image_strength": image_strength,
                 "lora_paths": lora_paths,
                 "lora_scales": lora_scales,
                 "filename_prefix": "Mflux",
