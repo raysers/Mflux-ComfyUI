@@ -39,7 +39,7 @@ class MfluxImg2Img:
         with Image.open(image_path) as img:
             width, height = img.size
 
-        return MfluxImagePipeline(image_path, image_strength), width, height
+        return MfluxImg2ImgPipeline(image_path, image_strength), width, height
 
     @classmethod
     def IS_CHANGED(cls, image, image_strength):
