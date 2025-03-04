@@ -7,7 +7,7 @@
 # Quick Mflux on Comfyui
 
 ## Introduction
-Simple use of Mflux in ComfyUI, suitable for users who are not familiar with terminal usage. Only for MacOS.
+Simple use of Mflux in ComfyUI, suitable for users who are not familiar with terminal usage. Only for MacOS. This is a simplified branch of the original MFlux ComfyUI plugin which is maintained by InformEthics. 
 
 ## Acknowledgements
 
@@ -22,17 +22,17 @@ Thanks also to **@CharafChnioune**, the author of [**MFLUX-WEBUI**](https://gith
 1. `cd /path/to/your_ComfyUI`
 2. Activate the virtual environment
 3. `cd custom_nodes`
-4. `git clone https://github.com/raysers/Mflux-ComfyUI.git`
-5. `pip install mflux==0.4.1`
+4. `git clone https://github.com/raysers/Mflux-ComfyUI/ComfyMFlux.git`
+5. `pip install mflux==0.5.1`
 6. Restart ComfyUI
-
-Alternatively, you can search for "Mflux-ComfyUI" in ComfyUI-Manager for a quick installation.
 
 ## Update Announcement
 
 ### **About This Update:**
-
-- The ControlNet node integrates images and intensity to distinguish it from img2img — contribution from @InformEthics.
+(contributions from @InformEthics)
+- The Nodes are all in one directory instead of many (Air / Pro etc..)
+- The whole node is unified in one python file ComfyMFlux.py for easier overview and programming
+- The ControlNet node integrates images and intensity to distinguish it from img2img
 
 This is the first time other contributors have participated in updating this plugin. Thanks @InformEthics.
 
@@ -56,7 +56,7 @@ If you'd like to experience the original mflux, this provides an additional opti
 - Customizable file paths.  
 - Image-to-Image generation.
 
-mflux has been updated to version 0.4.1. To experience image-to-image generation, please upgrade in ComfyUI with:
+mflux has been updated to version 0.5.1. Please upgrade in ComfyUI with:
 
 `pip install --upgrade mflux`
 
@@ -64,15 +64,12 @@ mflux has been updated to version 0.4.1. To experience image-to-image generation
 
 Right-click to create nodes:
 
-Under **MFlux/Air**:
+Under **MFlux/**:
 
 - **Quick MFlux Generation**  
 - **MFlux Models Loader**
 - **MFlux Models Downloader**
 - **MFlux Custom Models**
-
-Under **MFlux/Pro**:
-
 - **Mflux Img2Img**
 - **MFlux Loras Loader**  
 - **MFlux ControlNet Loader**
@@ -116,7 +113,7 @@ Additionally, here is the FLUX.1-dev-Controlnet-Canny model from the InstantX te
 
 ## Workflow
 
-### **Mflux Air:**
+### **Mflux:**
 
 #### text2img:
 
@@ -163,9 +160,6 @@ This update also adds the option to manually input paths. Alternatively, you can
 I am still exploring the specific usage methods. If you have experiences worth sharing, please feel free to start a discussion in the issues.
 
 
-### **Mflux Pro:**
-
-
 #### Loras:
 
 ![Loras](examples/Pro_Loras.png)
@@ -197,31 +191,6 @@ The advantage of this 4-step LoRA model is that it still belongs to the DEV mode
 
 
 
-### **Mflux Plus:**
-
-![Translate + Mflux](examples/Plus1.png)
-
-A must-have for English beginners.
-
-
-![Florence2 + Mflux](examples/Plus2.png)
-
-Image reverse generation, using the MiaoshouAI/Florence-2-large-PromptGen-v1.5 visual model here.
-
-All these processes can be dragged directly into ComfyUI from the workflows folder.
-
-!!! If nodes are highlighted in red, use ComfyUI-Manager's "One-click Install Missing Nodes."
-!!! Please note that all processes at the end use preview nodes, which do not automatically save. You need to manually save the generated images you are satisfied with or simply replace the preview nodes with save nodes.
-
-### **Possible Explorations**
-
-#### **Mflux MAX:**
-
-......
-
-#### **Mflux Ultra:**
-
-......
 
 Here, I hope everyone shares their workflows more, fully promoting the spirit of sharing on the internet. Knowledge for payment? No, I advocate cooperation and sharing for mutual benefit.
 
