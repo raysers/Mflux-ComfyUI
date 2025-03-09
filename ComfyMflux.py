@@ -51,11 +51,11 @@ def get_lora_info(Loras):
         return Loras.lora_paths, Loras.lora_scales
     return [], []
 
-def generate_image(prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None):
+def generate_image(prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", img2img=None, Loras=None, ControlNet=None):
     model = "dev" if "dev" in Local_model.lower() else "schnell" if "schnell" in Local_model.lower() else model
     print(f"Using model: {model}")
-    image_path = image.image_path if image else None
-    strength = image.strength if image else None
+    img2img_image_path = img2img.image_path if img2img else None
+    img2img_strength = img2img.strength if img2img else None
 
     lora_paths, lora_scales = get_lora_info(Loras)
     if Loras:
@@ -84,8 +84,8 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
             width=width,
             guidance=guidance,
             **({"controlnet_strength": control_strength} if ControlNet else {
-                "init_image_path": image_path,
-                "init_image_strength": strength
+                "init_image_path": img2img_image_path,
+                "init_image_strength": img2img_strength
             })
         ),
         model_config=flux.model_config
@@ -104,9 +104,9 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
 
     t5_tokens = flux.t5_tokenizer.tokenize(prompt)
     clip_tokens = flux.clip_tokenizer.tokenize(prompt)
-    prompt_embeds = flux.t5_text_encoder.forward(t5_tokens)
-    pooled_prompt_embeds = flux.clip_text_encoder.forward(clip_tokens)
-
+    prompt_embeds = flux.t5_text_encoder(t5_tokens)
+    pooled_prompt_embeds = flux.clip_text_encoder(clip_tokens)
+    
     if ControlNet:
         control_image = ImageUtil.load_image(control_image_path)
         control_image = ControlnetUtil.scale_image(config.height, config.width, control_image)
@@ -134,7 +134,7 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
         }
 
         if ControlNet:
-            controlnet_block_samples, controlnet_single_block_samples = flux.transformer_controlnet.forward(
+            controlnet_block_samples, controlnet_single_block_samples = flux.transformer_controlnet(
                 t=t,
                 prompt_embeds=prompt_embeds,
                 pooled_prompt_embeds=pooled_prompt_embeds,
@@ -172,7 +172,7 @@ def generate_image(prompt, model, seed, width, height, steps, guidance, quantize
 
     return (tensor_image,)
 
-def save_images_with_metadata(images, prompt, model, quantize, Local_model, seed, height, width, steps, guidance, lora_paths, lora_scales, image_path, strength, filename_prefix="Mflux", full_prompt=None, extra_pnginfo=None):
+def save_images_with_metadata(images, prompt, model, quantize, Local_model, seed, height, width, steps, guidance, lora_paths, lora_scales, img2img_image_path, img2img_strength, filename_prefix="Mflux", full_prompt=None, extra_pnginfo=None):
     
     output_dir = folder_paths.get_output_directory()
     full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
@@ -218,8 +218,8 @@ def save_images_with_metadata(images, prompt, model, quantize, Local_model, seed
             "steps": steps,
             "guidance": guidance if model == "dev" else None,
             "Local_model": Local_model,
-            "init_image_path": image_path,
-            "init_image_strength": strength,
+            "img2img_image_path": img2img_image_path,
+            "img2img_strength": img2img_strength,
             "lora_paths": lora_paths,
             "lora_scales": lora_scales,
         }
@@ -358,7 +358,7 @@ class QuickMfluxNode:
             },
             "optional": {
                 "Local_model": ("PATH",),
-                "image": ("MfluxImagePipeline",),
+                "img2img": ("MfluxImg2ImgPipeline",),
                 "Loras": ("MfluxLorasPipeline",),
                 "ControlNet": ("MfluxControlNetPipeline",),
             },
@@ -372,13 +372,13 @@ class QuickMfluxNode:
     CATEGORY = "MFlux"
     FUNCTION = "generate"
 
-    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", image=None, Loras=None, ControlNet=None, full_prompt=None, extra_pnginfo=None):
+    def generate(self, prompt, model, seed, width, height, steps, guidance, quantize="None", metadata=True, Local_model="", img2img=None, Loras=None, ControlNet=None, full_prompt=None, extra_pnginfo=None):
         generated_images = generate_image(
-            prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, image, Loras, ControlNet
+            prompt, model, seed, width, height, steps, guidance, quantize, metadata, Local_model, img2img, Loras, ControlNet
         )
 
-        image_path = image.image_path if image else None
-        strength = image.strength if image else None
+        img2img_image_path = img2img.image_path if img2img else None
+        img2img_strength = img2img.strength if img2img else None
         lora_paths, lora_scales = get_lora_info(Loras)
 
         if metadata:
@@ -393,8 +393,8 @@ class QuickMfluxNode:
                 "width": width,
                 "steps": steps,
                 "guidance": guidance,
-                "image_path": image_path,
-                "strength": strength,
+                "img2img_image_path": img2img_image_path,
+                "img2img_strength": img2img_strength,
                 "lora_paths": lora_paths,
                 "lora_scales": lora_scales,
                 "filename_prefix": "Mflux",
@@ -407,7 +407,7 @@ class QuickMfluxNode:
 
         return generated_images
 
-class MfluxImagePipeline:
+class MfluxImg2ImgPipeline:
     def __init__(self, image_path, strength):
         self.image_path = image_path
         self.strength = strength
@@ -416,7 +416,7 @@ class MfluxImagePipeline:
         self.image_path = None
         self.strength = None
 
-class MfluxLoadImg2Img:
+class MfluxImg2Img:
     @classmethod
     def INPUT_TYPES(cls):
         input_dir = folder_paths.get_input_directory()
@@ -430,8 +430,8 @@ class MfluxLoadImg2Img:
         }
 
     CATEGORY = "MFlux"
-    RETURN_TYPES = ("MfluxImagePipeline", "INT", "INT")
-    RETURN_NAMES = ("image", "width", "height")
+    RETURN_TYPES = ("MfluxImg2ImgPipeline", "INT", "INT")
+    RETURN_NAMES = ("img2img", "width", "height")
     FUNCTION = "load_and_process"
 
     def load_and_process(self, image, strength):
@@ -440,7 +440,7 @@ class MfluxLoadImg2Img:
         with Image.open(image_path) as img:
             width, height = img.size
 
-        return MfluxImagePipeline(image_path, strength), width, height
+        return MfluxImg2ImgPipeline(image_path, strength), width, height
 
     @classmethod
     def IS_CHANGED(cls, image, strength):
